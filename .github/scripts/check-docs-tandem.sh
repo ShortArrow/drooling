@@ -14,10 +14,15 @@ declare -A extra_pairs=(
 )
 
 # First push of a branch (all-zero before) or an unreachable base: compare
-# against the head's parent so the check still sees the last change.
+# against the head's parent so the check still sees the last change. A root
+# commit has no parent — diff against the empty tree so it is checked too.
 if [ "$base" = "0000000000000000000000000000000000000000" ] \
   || ! git cat-file -e "$base" 2>/dev/null; then
-  base="${head}^"
+  if git rev-parse -q --verify "${head}^" >/dev/null 2>&1; then
+    base="${head}^"
+  else
+    base=$(git hash-object -t tree /dev/null)
+  fi
 fi
 
 changed="$(git diff --name-only "$base" "$head")"
