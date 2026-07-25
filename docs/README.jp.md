@@ -15,7 +15,7 @@ Windows は WinUSB を自動バインドする — Zadig や手動ドライバ�
 ```toml
 # Cargo.toml
 [dependencies]
-drooling = { path = "../drooling" }   # または git 依存
+drooling = "0.1"
 ```
 
 ```rust

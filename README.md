@@ -15,7 +15,7 @@ BOS / Microsoft OS 2.0 descriptors — no Zadig, no manual driver setup.
 ```toml
 # Cargo.toml
 [dependencies]
-drooling = { path = "../drooling" }   # or a git dependency
+drooling = "0.1"
 ```
 
 ```rust

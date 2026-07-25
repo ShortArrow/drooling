@@ -8,11 +8,30 @@ permissions:
   contents: read
 
 jobs:
+  guard:
+    # Catches a tag pushed against the wrong commit before any expensive
+    # job runs: Cargo.toml at the tagged commit must read the tag's version.
+    name: Guard (Cargo.toml version matches tag)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compare tag with manifest version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          manifest_version=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          if [ "$tag_version" != "$manifest_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Cargo.toml version $manifest_version"
+            exit 1
+          fi
+
   test:
     # Gate the release on tests passing on every platform we develop on; a
     # tag push would otherwise produce artifacts from a commit whose tests
     # never ran before this workflow.
     name: Test (${{ matrix.os }})
+    needs: guard
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
