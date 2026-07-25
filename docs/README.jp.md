@@ -10,6 +10,10 @@ RP2040 の Rust ファームウェアを、picotool の vendor reset interface �
 (BOOTSEL ボタン不要)。同梱の BOS / Microsoft OS 2.0 ディスクリプタにより
 Windows は WinUSB を自動バインドする — Zadig や手動ドライバ導入は不要。
 
+名前の由来: USB Type-C の口は、よだれを垂らしそうなスライムの口に見える。
+その口から漏れ出てくるのは操作 — ボタンを押さなくても再起動・書き込みが
+よだれのように USB ポートから滲み出てくる。
+
 ## 他プロジェクトからの使い方
 
 ```toml

@@ -10,6 +10,11 @@ Add the `PicotoolReset` class to your USB composite device and
 BOOTSEL button. Windows binds WinUSB automatically via the bundled
 BOS / Microsoft OS 2.0 descriptors — no Zadig, no manual driver setup.
 
+The name: a USB Type-C port looks like the mouth of a slime about to
+drool. What leaks out of this one, drool-like, is control — the ability
+to reboot and reflash the board seeps out of the USB port with no button
+pressed.
+
 ## Using from your project
 
 ```toml
