@@ -22,7 +22,7 @@ use panic_halt as _;
 use usb_device::{prelude::*, class_prelude::UsbBusAllocator, LangID, device::UsbRev};
 use usbd_serial::SerialPort;
 
-use drooling::vendor_reset_winusb::VendorResetWinUsb;
+use drooling::PicotoolReset;
 
 #[entry]
 fn main() -> ! {
@@ -54,7 +54,7 @@ fn main() -> ! {
     let usb_bus = unsafe { USB_BUS.as_ref().unwrap() };
 
     let mut serial = SerialPort::new(usb_bus);
-    let mut picotool = VendorResetWinUsb::new(usb_bus);
+    let mut picotool = PicotoolReset::new(usb_bus);
 
     let mut usb_dev = UsbDeviceBuilder::new(usb_bus, UsbVidPid(0x2e8a, 0x000a))
         .strings(&[StringDescriptors::new(LangID::EN_US)

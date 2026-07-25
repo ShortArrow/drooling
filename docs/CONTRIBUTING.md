@@ -16,14 +16,14 @@ $ cargo run --release --example demo   # flashes the demo (see README for the fi
 `no_std` library crate plus a demo binary in `examples/`.
 
 ```
-consumer firmware ──▶ vendor_reset_winusb (UsbClass) ──▶ ms_os_20 (descriptor data)
+consumer firmware ──▶ picotool_reset (UsbClass) ──▶ ms_os_20 (descriptor data)
                                    └──▶ rp2040_hal::rom_data (BOOTSEL reboot)
 ```
 
 - **ms_os_20**: dependency-free descriptor byte arrays (BOS platform
   capability, MS OS 2.0 descriptor set). Compiles on any host, which is
   what makes the structural tests possible.
-- **vendor_reset_winusb**: the `UsbClass` implementation — interface
+- **picotool_reset**: the `UsbClass` implementation — interface
   descriptor, BOS/MS OS 2.0 request handling, reset request handling.
   Target-gated (`arm` + `none`).
 

@@ -5,7 +5,7 @@
 RP2040 の Rust ファームウェアを、picotool の vendor reset interface 経由で
 ボタン操作なしに書き込むためのクレート。純 Rust・Pico SDK 互換・Windows 対応。
 
-`VendorResetWinUsb` クラスを USB 複合デバイスに追加すると、
+`PicotoolReset` クラスを USB 複合デバイスに追加すると、
 `picotool reboot -f -u` で実行中ファームを BOOTSEL モードへ再起動できる
 (BOOTSEL ボタン不要)。同梱の BOS / Microsoft OS 2.0 ディスクリプタにより
 Windows は WinUSB を自動バインドする — Zadig や手動ドライバ導入は不要。
@@ -19,11 +19,11 @@ drooling = "0.1"
 ```
 
 ```rust
-use drooling::vendor_reset_winusb::VendorResetWinUsb;
+use drooling::PicotoolReset;
 
 // rp2040-hal の USB バス構築後:
 let mut serial = SerialPort::new(&usb_bus);
-let mut picotool = VendorResetWinUsb::new(&usb_bus);
+let mut picotool = PicotoolReset::new(&usb_bus);
 
 let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x2e8a, 0x000a))
     .strings(&[StringDescriptors::new(LangID::EN_US)  // EN ではなく EN_US
@@ -88,7 +88,7 @@ cargo run --release --example demo
 
 `picotool reboot -f -u` は vendor interface へ class request を送り、
 ファームウェアが boot ROM の `reset_to_usb_boot()` を呼んで BOOTSEL
-デバイスとして再列挙する(`src/vendor_reset_winusb.rs`)。
+デバイスとして再列挙する(`src/picotool_reset.rs`)。
 
 Windows が vendor interface に WinUSB を自動バインドできるよう、
 Microsoft OS 2.0 ディスクリプタを提供する(`src/ms_os_20.rs`):
@@ -115,7 +115,7 @@ ID・COM ポート・エラーなしで WinUSB にバインドされた「Reset�
 .
 ├── src/
 │   ├── lib.rs                # クレートドキュメント (必須 Builder 設定含む)
-│   ├── vendor_reset_winusb.rs# reset interface UsbClass (MS OS 2.0 応答含む)
+│   ├── picotool_reset.rs# reset interface UsbClass (MS OS 2.0 応答含む)
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 ディスクリプタ + 構造テスト
 ├── examples/demo.rs          # CDC シリアル + reset interface + LED
 ├── tools/flash.cmd           # ボタンレス書き込みスクリプト (reboot -f -u → load)

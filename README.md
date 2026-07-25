@@ -5,7 +5,7 @@
 Button-free flashing for Rust firmware on RP2040, using picotool's vendor
 reset interface — pure Rust, Pico SDK compatible, works on Windows.
 
-Add the `VendorResetWinUsb` class to your USB composite device and
+Add the `PicotoolReset` class to your USB composite device and
 `picotool reboot -f -u` reboots the running firmware into BOOTSEL mode, no
 BOOTSEL button. Windows binds WinUSB automatically via the bundled
 BOS / Microsoft OS 2.0 descriptors — no Zadig, no manual driver setup.
@@ -19,11 +19,11 @@ drooling = "0.1"
 ```
 
 ```rust
-use drooling::vendor_reset_winusb::VendorResetWinUsb;
+use drooling::PicotoolReset;
 
 // after setting up the rp2040-hal USB bus:
 let mut serial = SerialPort::new(&usb_bus);
-let mut picotool = VendorResetWinUsb::new(&usb_bus);
+let mut picotool = PicotoolReset::new(&usb_bus);
 
 let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x2e8a, 0x000a))
     .strings(&[StringDescriptors::new(LangID::EN_US)  // EN_US, not EN
@@ -90,7 +90,7 @@ The demo enumerates as a composite USB device (VID:PID `2e8a:000a`):
 
 `picotool reboot -f -u` sends a class request to the vendor interface; the
 firmware calls the boot ROM's `reset_to_usb_boot()` and re-enumerates as a
-BOOTSEL device (`src/vendor_reset_winusb.rs`).
+BOOTSEL device (`src/picotool_reset.rs`).
 
 For Windows to bind WinUSB to the vendor interface automatically, the device
 provides Microsoft OS 2.0 descriptors (`src/ms_os_20.rs`): a BOS platform
@@ -117,7 +117,7 @@ device with a serial-number-based instance ID, a COM port, and an error-free
 .
 ├── src/
 │   ├── lib.rs                # crate docs incl. required builder settings
-│   ├── vendor_reset_winusb.rs# reset interface UsbClass with MS OS 2.0 handling
+│   ├── picotool_reset.rs# reset interface UsbClass with MS OS 2.0 handling
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 descriptors + structural tests
 ├── examples/demo.rs          # CDC serial + reset interface + LED
 ├── tools/flash.cmd           # button-free flash script (reboot -f -u, then load)

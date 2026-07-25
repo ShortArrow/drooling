@@ -15,7 +15,7 @@ verified end to end.
 
 ## RP2350 support
 
-- Port `vendor_reset_winusb` to `rp235x-hal` (boot ROM API differs)
+- Port `picotool_reset` to `rp235x-hal` (boot ROM API differs)
 - picotool has fewer Windows restrictions on RP2350; revisit the flash flow
 
 ## Demo modernization

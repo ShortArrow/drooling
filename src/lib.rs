@@ -1,7 +1,7 @@
 //! Pico SDK compatible picotool reset interface for RP2040 Rust firmware.
 //!
-//! Add [`vendor_reset_winusb::VendorResetWinUsb`] to a `usb-device` composite
-//! device and `picotool reboot -f -u` (and on Linux/macOS `picotool load -f`)
+//! Add [`PicotoolReset`] to a `usb-device` composite device and
+//! `picotool reboot -f -u` (and on Linux/macOS `picotool load -f`)
 //! can reboot the running firmware into BOOTSEL mode — no BOOTSEL button.
 //! Windows binds WinUSB to the interface automatically via the bundled
 //! BOS / Microsoft OS 2.0 descriptors ([`ms_os_20`]).
@@ -28,4 +28,14 @@
 pub mod ms_os_20;
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
-pub mod vendor_reset_winusb;
+pub mod picotool_reset;
+
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+pub use picotool_reset::PicotoolReset;
+
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+#[deprecated(since = "0.1.1", note = "renamed to `drooling::PicotoolReset`")]
+pub mod vendor_reset_winusb {
+    //! Renamed to [`crate::picotool_reset`].
+    pub use crate::picotool_reset::PicotoolReset as VendorResetWinUsb;
+}

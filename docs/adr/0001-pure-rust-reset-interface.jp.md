@@ -23,7 +23,7 @@ Windows では vendor interface に WinUSB が自動バインドされる必要�
 
 ## Decision
 
-候補3を採用する。`vendor_reset_winusb::VendorResetWinUsb`(UsbClass)が
+候補3を採用する。`picotool_reset::PicotoolReset`(UsbClass)が
 interface 記述子・BOS platform capability・MS OS 2.0 descriptor set・
 reset 要求処理(boot ROM `reset_to_usb_boot`)をすべて持つ。
 

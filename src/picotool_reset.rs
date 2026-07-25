@@ -27,22 +27,22 @@ const RESET_REQUEST_BOOTSEL: u8 = 0x01;
 const RESET_REQUEST_FLASH: u8 = 0x02;
 
 /// Pico SDK compatible vendor reset interface with Windows support
-pub struct VendorResetWinUsb {
+pub struct PicotoolReset {
     iface: InterfaceNumber,
     str_idx: StringIndex,
 }
 
-impl VendorResetWinUsb {
+impl PicotoolReset {
     /// Create a new vendor reset interface with Windows support
-    pub fn new<B: UsbBus>(alloc: &UsbBusAllocator<B>) -> VendorResetWinUsb {
-        VendorResetWinUsb {
+    pub fn new<B: UsbBus>(alloc: &UsbBusAllocator<B>) -> PicotoolReset {
+        PicotoolReset {
             iface: alloc.interface(),
             str_idx: alloc.string(),
         }
     }
 }
 
-impl<B: UsbBus> UsbClass<B> for VendorResetWinUsb {
+impl<B: UsbBus> UsbClass<B> for PicotoolReset {
     fn get_configuration_descriptors(&self, writer: &mut DescriptorWriter) -> Result<()> {
         // Write vendor reset interface descriptor
         writer.interface_alt(

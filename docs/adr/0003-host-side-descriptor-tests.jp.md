@@ -20,7 +20,7 @@ BOOTSEL ボタン操作を伴う書き込みサイクルが必要だった。Win
 
 crate は `no_std` だが、ディスクリプタ定義(`ms_os_20`)は依存ゼロの
 純データなのでホストでコンパイル・実行できる。ハードウェア依存モジュール
-(`vendor_reset_winusb` など)は `cfg(all(target_arch = "arm",
+(`picotool_reset` など)は `cfg(all(target_arch = "arm",
 target_os = "none"))` でゲートすればよい。
 
 ## Decision

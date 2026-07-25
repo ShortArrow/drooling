@@ -15,7 +15,7 @@ Windows のみ。
 
 ## RP2350 対応
 
-- `vendor_reset_winusb` を `rp235x-hal` に移植する(boot ROM API が異なる)
+- `picotool_reset` を `rp235x-hal` に移植する(boot ROM API が異なる)
 - RP2350 は Windows での picotool 制限が少ないため、書き込みフローを再検討
 
 ## デモの近代化
