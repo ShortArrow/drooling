@@ -1,0 +1,158 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # Gate the release on tests passing on every platform we develop on; a
+    # tag push would otherwise produce artifacts from a commit whose tests
+    # never ran before this workflow.
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-latest
+            host-target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            host-target: x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv6m-none-eabi
+      - name: Install flip-link
+        run: cargo install flip-link
+      - run: cargo build --release --locked --example demo
+      - run: cargo test --lib --locked --target ${{ matrix.host-target }}
+
+  build:
+    # The library itself ships as source via crates.io; the release artifact
+    # is the demo firmware for drag-and-drop (UF2) or picotool (ELF) install.
+    name: Build demo firmware
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv6m-none-eabi
+      - uses: Swatinem/rust-cache@v2
+      - name: Install flip-link and elf2uf2-rs
+        run: cargo install flip-link elf2uf2-rs
+      - name: Build demo (thumbv6m)
+        run: cargo build --release --locked --example demo
+      - name: Package ELF + UF2
+        run: |
+          cp target/thumbv6m-none-eabi/release/examples/demo drooling-demo.elf
+          elf2uf2-rs drooling-demo.elf drooling-demo.uf2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: drooling-demo
+          path: drooling-demo.*
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # Required for actions/attest-build-provenance to mint a Sigstore
+      # signing certificate via the GitHub OIDC provider.
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Attest build provenance
+        # Signed SLSA provenance for every artifact, published before the
+        # release itself so a failure aborts instead of shipping unattested
+        # binaries. GitHub does not offer attestations on user-owned PRIVATE
+        # repositories, so this arms itself automatically when the repo goes
+        # public.
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: artifacts/*
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        # SemVer marks pre-releases with a hyphen (v0.1.0-pre, v1.0.0-rc.1);
+        # mirror that on the GitHub release.
+        run: |
+          case "$TAG" in
+            *-*) prerelease=--prerelease ;;
+            *) prerelease= ;;
+          esac
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --generate-notes \
+            $prerelease \
+            artifacts/*
+
+  publish-crates:
+    # Publish to crates.io via OIDC Trusted Publishing — no long-lived
+    # CARGO_REGISTRY_TOKEN anywhere. Set `[skip publish]` in the tagged
+    # commit message to bypass this job.
+    name: Publish to crates.io (OIDC)
+    needs: [test, build, release]
+    if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Exchange OIDC token for crates.io token
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - name: Dry-run publish (sanity check)
+        # Catches packaging issues (missing files, manifest rejection) before
+        # the real publish; skipped when this version is already published
+        # so tag-rerun after a glitch stays green.
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          status=$(curl -fsS -o /dev/null -w '%{http_code}' \
+            "https://crates.io/api/v1/crates/drooling/$version" || echo "000")
+          if [ "$status" = "200" ]; then
+            echo "drooling $version already on crates.io — skipping dry-run"
+          else
+            cargo publish --dry-run
+          fi
+
+      - name: Publish drooling
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          status=$(curl -fsS -o /dev/null -w '%{http_code}' \
+            "https://crates.io/api/v1/crates/drooling/$version" || echo "000")
+          if [ "$status" = "200" ]; then
+            echo "drooling $version already on crates.io — skipping publish"
+          else
+            cargo publish
+          fi

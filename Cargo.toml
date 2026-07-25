@@ -1,0 +1,33 @@
+[package]
+name = "drooling"
+version = "0.1.0"
+edition = "2021"
+description = "Pico SDK compatible picotool reset interface (vendor class + BOS / MS OS 2.0 descriptors) for RP2040 Rust firmware"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ShortArrow/drooling"
+readme = "README.md"
+keywords = ["rp2040", "picotool", "usb", "winusb", "embedded"]
+categories = ["embedded", "no-std", "hardware-support"]
+# Examples are excluded: they carry a cortex-m-rt entry point and cannot
+# compile on the host, which would fail `cargo publish`'s verify build.
+include = ["/src", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE"]
+
+[dependencies]
+usb-device = { version = "0.3", features = ["control-buffer-256"] }
+rp2040-hal = "0.10"
+cortex-m = "0.7"
+
+[dev-dependencies]
+cortex-m-rt = "0.7"
+embedded-hal = "1.0.0"
+rp-pico = "0.9"
+panic-halt = "0.2"
+usbd-serial = "0.2"
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1

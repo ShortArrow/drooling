@@ -1,0 +1,12 @@
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# Button-free flash: reboots running firmware into BOOTSEL via the vendor
+# reset interface, then loads. First flash still needs the BOOTSEL button.
+runner = "./tools/flash.cmd"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=--nmagic",
+]
+
+[build]
+target = "thumbv6m-none-eabi"
