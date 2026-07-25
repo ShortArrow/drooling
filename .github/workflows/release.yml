@@ -142,7 +142,11 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
+      # The repo's .cargo/config.toml defaults the build target to
+      # thumbv6m-none-eabi, so `cargo publish`'s verify build needs it.
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv6m-none-eabi
 
       - name: Exchange OIDC token for crates.io token
         id: auth
@@ -157,7 +161,7 @@ jobs:
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          status=$(curl -fsS -o /dev/null -w '%{http_code}' \
+          status=$(curl -fsS -A "drooling-release-workflow" -o /dev/null -w '%{http_code}' \
             "https://crates.io/api/v1/crates/drooling/$version" || echo "000")
           if [ "$status" = "200" ]; then
             echo "drooling $version already on crates.io — skipping dry-run"
@@ -171,7 +175,7 @@ jobs:
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          status=$(curl -fsS -o /dev/null -w '%{http_code}' \
+          status=$(curl -fsS -A "drooling-release-workflow" -o /dev/null -w '%{http_code}' \
             "https://crates.io/api/v1/crates/drooling/$version" || echo "000")
           if [ "$status" = "200" ]; then
             echo "drooling $version already on crates.io — skipping publish"
