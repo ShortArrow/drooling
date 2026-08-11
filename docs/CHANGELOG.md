@@ -9,6 +9,8 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-08-11
+
 ### Fixed
 
 - The BOOTSEL request handler passed the raw GPIO pin number from
