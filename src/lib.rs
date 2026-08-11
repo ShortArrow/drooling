@@ -26,6 +26,7 @@
 #![cfg_attr(not(test), no_std)]
 
 pub mod ms_os_20;
+pub mod protocol;
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 pub mod picotool_reset;

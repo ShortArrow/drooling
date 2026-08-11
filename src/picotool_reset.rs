@@ -130,21 +130,8 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
 
         match req.request {
             RESET_REQUEST_BOOTSEL => {
-                // Extract parameters from wValue
-                let w_value = req.value;
-
-                // Bits 0-6: interface disable mask
-                let interface_mask = (w_value & 0x7F) as u32;
-
-                // Bit 8: GPIO pin specified
-                let gpio_specified = (w_value & (1 << 8)) != 0;
-
-                // Bits 9-14: GPIO pin number (if bit 8 is set)
-                let gpio_pin = if gpio_specified {
-                    ((w_value >> 9) & 0x3F) as u32
-                } else {
-                    0
-                };
+                let (gpio_activity, disable_interface_mask) =
+                    crate::protocol::bootsel_reset_args(req.value);
 
                 // Accept the transfer
                 if xfer.accept().is_err() {
@@ -155,7 +142,7 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
                 cortex_m::asm::delay(1000000); // ~8ms at 125MHz
 
                 // Enter BOOTSEL mode
-                rom_data::reset_to_usb_boot(gpio_pin, interface_mask);
+                rom_data::reset_to_usb_boot(gpio_activity, disable_interface_mask);
 
                 // Will never return
                 #[allow(clippy::empty_loop)]
