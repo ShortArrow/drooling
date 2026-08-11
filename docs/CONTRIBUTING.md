@@ -55,7 +55,12 @@ and indexed in `adr/README.md`.
 
 ## Release
 
-Push a `v*` tag. CI gates the release on tests, builds the demo UF2/ELF,
-creates a GitHub release with generated notes, and publishes to crates.io
-via OIDC trusted publishing. Put `[skip publish]` in the tagged commit
-message to skip crates.io.
+1. Bump the version in `Cargo.toml`, move the `[Unreleased]` entries of
+   `CHANGELOG.md` under the new `[X.Y.Z]` heading, and push to `main`.
+2. Push a `v*` tag matching the version. CI gates the release on tests,
+   builds the demo UF2/ELF, creates a GitHub release with generated
+   notes, and publishes to crates.io via OIDC trusted publishing. Put
+   `[skip publish]` in the tagged commit message to skip crates.io.
+
+`CHANGELOG.md` is English-only by convention and therefore exempt from
+the bilingual tandem check.
