@@ -144,7 +144,7 @@ device with a serial-number-based instance ID, a COM port, and an error-free
 ├── tools/flash.cmd           # button-free flash script (reboot -f -u, then load)
 ├── .cargo/config.toml        # picotool runner + build target
 ├── docs/                     # Japanese README, CONTRIBUTING, ROADMAP, ADRs,
-│                             #   and the investigation record (CONCLUSION.md)
+│                             #   CHANGELOG, and the investigation record
 ├── variants/                 # earlier experiment binaries (not built)
 └── memory.x                  # RP2040 memory layout
 ```

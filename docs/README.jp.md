@@ -141,7 +141,7 @@ ID・COM ポート・エラーなしで WinUSB にバインドされた「Reset�
 ├── tools/flash.cmd           # ボタンレス書き込みスクリプト (reboot -f -u → load)
 ├── .cargo/config.toml        # picotool runner + ビルドターゲット
 ├── docs/                     # 日本語 README, CONTRIBUTING, ROADMAP, ADR,
-│                             #   調査記録 (CONCLUSION.md)
+│                             #   CHANGELOG, 調査記録 (CONCLUSION.md)
 ├── variants/                 # 過去の実験バイナリ (ビルド対象外)
 └── memory.x                  # RP2040 メモリレイアウト
 ```
