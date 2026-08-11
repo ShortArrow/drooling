@@ -37,7 +37,7 @@ let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x2e8a, 0x000a))
         .serial_number("123456")])
     .unwrap()
     .usb_rev(UsbRev::Usb210)   // Windows requests BOS only from >= 0x0210
-    .max_packet_size_0(64)     // rp2040-hal enumeration hazard below 18
+    .max_packet_size_0(64)     // rp2040-hal enumeration hazard below 18 bytes
     .unwrap()
     .composite_with_iads()
     .build();
@@ -58,7 +58,8 @@ For button-free `cargo run`, copy `tools/flash.cmd` and the `runner` line of
 
 ## Requirements
 
-- Rust toolchain with the `thumbv6m-none-eabi` target
+- Rust toolchain (rustup installs the `thumbv6m-none-eabi` target
+  automatically via `rust-toolchain.toml`)
 - `flip-link`: `cargo install flip-link`
 - `picotool` v2.x in PATH
 
@@ -80,9 +81,22 @@ Every flash after that: same command, no buttons. The cargo runner
 for BOOTSEL enumeration, and loads the new binary.
 
 > **Windows note**: picotool rejects single-shot forced commands
-> (`picotool load -f`) for RP2040 on Windows, so the runner uses the
-> supported two-step flow (`reboot -f -u`, then `load`). On Linux/macOS,
-> `picotool load -f` should work directly with this firmware.
+> (`picotool load -f`) for RP2040 on Windows, so the default runner uses
+> the supported two-step flow (`reboot -f -u`, then `load`).
+
+> **Linux/macOS note**: `tools/flash.cmd` is a Windows batch file — switch
+> the `runner` line in `.cargo/config.toml` to the single-shot
+> `picotool load -f -x -t elf` (a commented line there has it ready).
+> On Linux, add picotool's udev rules (or run as root) so the vendor
+> interface is accessible. Not yet verified on hardware by this project.
+
+Poll requirement: `usb_dev.poll(...)` must run at least every 10 ms while
+connected, so keep the main loop tight or poll from a USB interrupt.
+
+VID/PID: the `0x2e8a:0x000a` pair in the example is Raspberry Pi's; fine
+for personal boards, but products should use their own VID — picotool
+finds the reset interface by its class triple (`FF/00/01`) on third-party
+VIDs too.
 
 ## How it works
 
@@ -122,7 +136,8 @@ device with a serial-number-based instance ID, a COM port, and an error-free
 .
 ├── src/
 │   ├── lib.rs                # crate docs incl. required builder settings
-│   ├── picotool_reset.rs# reset interface UsbClass with MS OS 2.0 handling
+│   ├── picotool_reset.rs     # reset interface UsbClass with MS OS 2.0 handling
+│   ├── protocol.rs           # reset request wire-format parsing + tests
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 descriptors + structural tests
 ├── examples/demo.rs          # CDC serial + reset interface + LED
 ├── tools/flash.cmd           # button-free flash script (reboot -f -u, then load)

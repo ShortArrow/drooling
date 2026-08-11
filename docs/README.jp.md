@@ -36,7 +36,7 @@ let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x2e8a, 0x000a))
         .serial_number("123456")])
     .unwrap()
     .usb_rev(UsbRev::Usb210)   // Windows は bcdUSB >= 0x0210 でのみ BOS を要求
-    .max_packet_size_0(64)     // rp2040-hal は EP0 が小さいと列挙不具合
+    .max_packet_size_0(64)     // rp2040-hal は EP0 が 18 バイト未満だと列挙不具合
     .unwrap()
     .composite_with_iads()
     .build();
@@ -56,7 +56,8 @@ loop {
 
 ## 必要なもの
 
-- Rust toolchain(`thumbv6m-none-eabi` ターゲット)
+- Rust toolchain(`thumbv6m-none-eabi` ターゲットは
+  `rust-toolchain.toml` により rustup が自動導入)
 - `flip-link`: `cargo install flip-link`
 - `picotool` v2.x(PATH が通っていること)
 
@@ -77,9 +78,21 @@ cargo run --release --example demo
 新しいバイナリを書き込む。
 
 > **Windows の注意**: picotool は RP2040 + Windows でワンショットの
-> forced command(`picotool load -f`)を拒否するため、runner はサポート
-> されている2段階フロー(`reboot -f -u` → `load`)を使う。Linux/macOS
-> では `picotool load -f` が直接使えるはず。
+> forced command(`picotool load -f`)を拒否するため、既定の runner は
+> サポートされている2段階フロー(`reboot -f -u` → `load`)を使う。
+
+> **Linux/macOS の注意**: `tools/flash.cmd` は Windows バッチファイル。
+> `.cargo/config.toml` の `runner` 行をワンショットの
+> `picotool load -f -x -t elf` に切り替える(コメント行として用意済み)。
+> Linux では vendor interface へアクセスするため picotool の udev rules
+> を追加する(または root で実行)。本プロジェクトでの実機検証は未実施。
+
+poll 要件: 接続中は `usb_dev.poll(...)` を最低 10ms ごとに呼ぶ必要が
+ある。メインループを軽く保つか、USB 割り込みから poll すること。
+
+VID/PID: 例の `0x2e8a:0x000a` は Raspberry Pi のもの。個人のボードでは
+問題ないが、製品では自前の VID を使うこと — picotool はサードパーティ
+VID でも class triple(`FF/00/01`)で reset interface を発見する。
 
 ## 動作原理
 
@@ -119,7 +132,8 @@ ID・COM ポート・エラーなしで WinUSB にバインドされた「Reset�
 .
 ├── src/
 │   ├── lib.rs                # クレートドキュメント (必須 Builder 設定含む)
-│   ├── picotool_reset.rs# reset interface UsbClass (MS OS 2.0 応答含む)
+│   ├── picotool_reset.rs     # reset interface UsbClass (MS OS 2.0 応答含む)
+│   ├── protocol.rs           # reset 要求のワイヤ形式パース + テスト
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 ディスクリプタ + 構造テスト
 ├── examples/demo.rs          # CDC シリアル + reset interface + LED
 ├── tools/flash.cmd           # ボタンレス書き込みスクリプト (reboot -f -u → load)

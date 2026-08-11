@@ -6,10 +6,12 @@ Requirements: Rust (stable) with the `thumbv6m-none-eabi` target,
 `flip-link`, `picotool` v2.x in PATH, and an RP2040 board.
 
 ```console
-$ rustup target add thumbv6m-none-eabi
 $ cargo install flip-link
 $ cargo run --release --example demo   # flashes the demo (see README for the first-flash step)
 ```
+
+`rust-toolchain.toml` makes rustup install the `thumbv6m-none-eabi`
+target automatically.
 
 ## Architecture
 

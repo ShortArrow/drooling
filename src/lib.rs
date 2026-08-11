@@ -14,11 +14,15 @@
 //!     .strings(&[StringDescriptors::new(LangID::EN_US) /* not EN */ ...])
 //!     .unwrap()
 //!     .usb_rev(UsbRev::Usb210)   // Windows requests BOS only from >= 0x0210
-//!     .max_packet_size_0(64)     // rp2040-hal enumeration hazard below 18
+//!     .max_packet_size_0(64)     // rp2040-hal enumeration hazard below 18 bytes
 //!     .unwrap()
 //!     .composite_with_iads()
 //!     .build();
 //! ```
+//!
+//! Call `usb_dev.poll(...)` at least once every 10 ms while connected —
+//! preferably continuously from the main loop or a USB interrupt — or
+//! enumeration and reset requests will be missed.
 //!
 //! See `examples/demo.rs` for a complete composite device (CDC serial +
 //! reset interface + LED).

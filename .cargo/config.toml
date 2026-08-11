@@ -1,7 +1,10 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# Button-free flash: reboots running firmware into BOOTSEL via the vendor
-# reset interface, then loads. First flash still needs the BOOTSEL button.
+# Button-free flash. First flash still needs the BOOTSEL button.
+# Windows: two-step reboot+load script (picotool rejects single-shot
+# forced commands for RP2040 on Windows).
 runner = "./tools/flash.cmd"
+# Linux/macOS: single-shot forced load works; use this runner instead:
+# runner = "picotool load -f -x -t elf"
 rustflags = [
   "-C", "linker=flip-link",
   "-C", "link-arg=-Tlink.x",
