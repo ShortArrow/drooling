@@ -14,13 +14,13 @@ pub fn bootsel_reset_args(w_value: u16) -> (u32, u32) {
     let disable_interface_mask = (w_value & 0x7F) as u32;
 
     let gpio_specified = (w_value & (1 << 8)) != 0;
-    let gpio_activity = if gpio_specified {
-        ((w_value >> 9) & 0x3F) as u32
+    let gpio_activity_pin_mask = if gpio_specified {
+        1u32 << ((w_value >> 9) & 0x3F)
     } else {
         0
     };
 
-    (gpio_activity, disable_interface_mask)
+    (gpio_activity_pin_mask, disable_interface_mask)
 }
 
 #[cfg(test)]
@@ -43,8 +43,14 @@ mod tests {
     }
 
     #[test]
-    fn gpio_pin_25_with_specified_bit() {
+    fn gpio_pin_25_becomes_activity_mask() {
         let w_value = (1 << 8) | (25 << 9);
-        assert_eq!(bootsel_reset_args(w_value), (25, 0));
+        assert_eq!(bootsel_reset_args(w_value), (1 << 25, 0));
+    }
+
+    #[test]
+    fn gpio_pin_0_becomes_activity_mask_bit_0() {
+        let w_value = 1 << 8;
+        assert_eq!(bootsel_reset_args(w_value), (1 << 0, 0));
     }
 }
