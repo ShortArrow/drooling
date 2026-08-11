@@ -14,7 +14,9 @@ include = ["/src", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE"]
 
 [dependencies]
 usb-device = { version = "0.3", features = ["control-buffer-256"] }
-rp2040-hal = "0.10"
+# Only rom_data::reset_to_usb_boot is used; its signature is identical
+# across 0.10-0.12, so consumers may resolve any of them.
+rp2040-hal = ">=0.10, <0.13"
 cortex-m = "0.7"
 
 [dev-dependencies]
