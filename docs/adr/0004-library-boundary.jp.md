@@ -8,7 +8,7 @@ Accepted (2026-07-25)
 
 他プロジェクトのファームウェアから USB クラスとして組み込んで使うため、
 依存を最小化したライブラリ境界が要る。ボードは Raspberry Pi Pico に
-限らない(検証機は Seeed XIAO RP2040)。
+限らない(検証機は Seeed XIAO RP2040 と Waveshare RP2040-ETH)。
 
 ## Decision
 

@@ -64,7 +64,9 @@ loop {
 ## 同梱デモの実行
 
 `examples/demo.rs` は完全な複合デバイス(CDC シリアル + reset interface +
-LED 点滅)。Seeed XIAO RP2040 で検証済み(LED は GPIO25、アクティブ Low)。
+LED 点滅)。Seeed XIAO RP2040(LED は GPIO25、アクティブ Low)と
+Waveshare RP2040-ETH(ユーザー LED なし、USB と再書き込み動作を検証)で
+検証済み。
 
 初回のみ BOOTSEL ボタンが必要: BOOT を押しながら RESET を押して
 BOOTSEL モードにしてから:
