@@ -20,12 +20,15 @@ pressed.
 ```toml
 # Cargo.toml
 [dependencies]
-# RP2040 (default)
-drooling = "0.1"
+# RP2040
+drooling = { version = "0.2", features = ["rp2040"] }
 
-# RP2350 — the chip features are mutually exclusive, so turn the default off
-drooling = { version = "0.1", default-features = false, features = ["rp2350"] }
+# RP2350
+drooling = { version = "0.2", features = ["rp2350"] }
 ```
+
+The chip features are mutually exclusive and there is no default, so
+exactly one of them must be chosen.
 
 ```rust
 use drooling::PicotoolReset;
@@ -79,7 +82,7 @@ First flash (BOOTSEL button required once): enter BOOTSEL mode by holding
 BOOT while pressing RESET, then:
 
 ```sh
-cargo run --release --example demo_rp2040
+cargo run --release --example demo_rp2040 --features rp2040
 ```
 
 Every flash after that: same command, no buttons. The cargo runner
@@ -99,7 +102,7 @@ user LED; USB and reflash behavior verified). Build and flash it with:
 
 ```sh
 cargo run --release --example demo_rp2350 \
-    --no-default-features --features rp2350 \
+    --features rp2350 \
     --target thumbv8m.main-none-eabihf
 ```
 

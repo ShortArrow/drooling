@@ -12,8 +12,13 @@ categories = ["embedded", "no-std", "hardware-support"]
 # compile on the host, which would fail `cargo publish`'s verify build.
 include = ["/src", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE"]
 
+[package.metadata.docs.rs]
+features = ["rp2040"]
+default-target = "thumbv6m-none-eabi"
+targets = ["thumbv6m-none-eabi"]
+
 [features]
-default = ["rp2040"]
+default = []
 rp2040 = ["dep:rp2040-hal"]
 rp2350 = ["dep:rp235x-hal"]
 

@@ -26,23 +26,43 @@
 //!
 //! See `examples/demo_rp2040.rs` for a complete composite device (CDC serial +
 //! reset interface + LED) and `examples/demo_rp2350.rs` for the RP2350
-//! flavor (feature `rp2350`, mutually exclusive with the default `rp2040`).
+//! flavor. The `rp2040` and `rp2350` features are mutually exclusive and
+//! there is no default — enable exactly one of them explicitly.
 
 #![cfg_attr(not(test), no_std)]
 
 #[cfg(all(feature = "rp2040", feature = "rp2350"))]
 compile_error!("features `rp2040` and `rp2350` are mutually exclusive");
 
+#[cfg(all(
+    target_arch = "arm",
+    target_os = "none",
+    not(any(feature = "rp2040", feature = "rp2350"))
+))]
+compile_error!("select a chip: enable feature `rp2040` or `rp2350`");
+
 pub mod ms_os_20;
 pub mod protocol;
 
-#[cfg(all(target_arch = "arm", target_os = "none"))]
+#[cfg(all(
+    target_arch = "arm",
+    target_os = "none",
+    any(feature = "rp2040", feature = "rp2350")
+))]
 pub mod picotool_reset;
 
-#[cfg(all(target_arch = "arm", target_os = "none"))]
+#[cfg(all(
+    target_arch = "arm",
+    target_os = "none",
+    any(feature = "rp2040", feature = "rp2350")
+))]
 pub use picotool_reset::PicotoolReset;
 
-#[cfg(all(target_arch = "arm", target_os = "none"))]
+#[cfg(all(
+    target_arch = "arm",
+    target_os = "none",
+    any(feature = "rp2040", feature = "rp2350")
+))]
 #[deprecated(since = "0.1.1", note = "renamed to `drooling::PicotoolReset`")]
 pub mod vendor_reset_winusb {
     //! Renamed to [`crate::picotool_reset`].

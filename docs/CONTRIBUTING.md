@@ -7,7 +7,7 @@ and an RP2040 or RP2350 board.
 
 ```console
 $ cargo install flip-link
-$ cargo run --release --example demo_rp2040   # flashes the demo (see README for the first-flash step)
+$ cargo run --release --example demo_rp2040 --features rp2040   # flashes the demo (see README for the first-flash step)
 ```
 
 `rust-toolchain.toml` makes rustup install the `thumbv6m-none-eabi`

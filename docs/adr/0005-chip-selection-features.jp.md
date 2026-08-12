@@ -18,9 +18,13 @@ ROM の `reboot` API(`rp235x_hal::reboot`)を使う。プロトコル層
 
 ## Decision
 
-- **features**: `default = ["rp2040"]`、`rp2040 = ["dep:rp2040-hal"]`、
+- **features**: `default = []`、`rp2040 = ["dep:rp2040-hal"]`、
   `rp2350 = ["dep:rp235x-hal"]`。同時有効は `compile_error!` で拒否する。
-  既定を rp2040 にすることで既存利用者は無変更のまま。
+  `default = []` で常に明示選択とする。理由: 両チップの対称性、
+  `default-features = false` という間接的な指定の廃止、クレートが
+  チップを推測しないこと。チップ未指定の `compile_error!` は arm/none
+  ターゲット限定にして、ホスト(テスト・docs.rs・publish 検証)は
+  チップなしでビルド可能に保つ。
 - **チップ差は `picotool_reset.rs` の私有関数2つ
   (`enter_bootsel` / `reboot_to_application`)の cfg 分岐に閉じ込める。**
   RP2350 の `disable_interface_mask` は bit0 = MSD 無効、bit1 = picoboot
@@ -37,8 +41,14 @@ ROM の `reboot` API(`rp235x_hal::reboot`)を使う。プロトコル層
 
 ## Consequences
 
-- RP2350 利用側は `drooling = { version = "...", default-features =
-  false, features = ["rp2350"] }` と書く。
+- 利用側は `drooling = { version = "...", features = ["rp2040"] }` または
+  `features = ["rp2350"]` と書く。RP2350 行から `default-features = false`
+  が消え、両チップの記述が対称になる。
+- コマンドラインでも `--no-default-features` は不要になり、
+  `--features rp2040` / `--features rp2350` だけで足りる。
 - RP2350 は Windows でも単発 `picotool load -f` が使える(2段階の
   `tools/flash.cmd` が必須なのは RP2040 + Windows のみ)。
-- `--no-default-features` のみ(チップ未指定)は `compile_error!` になる。
+- 既存の `drooling = "0.1"`(チップ未指定)はファームターゲットで
+  `compile_error!` になるため、0.2.0 の Breaking として出荷する。
+  ホストビルド(テスト・docs.rs・`cargo publish` の検証ビルド)は
+  チップなしのまま通る。

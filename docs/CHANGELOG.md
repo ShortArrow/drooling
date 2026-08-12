@@ -9,6 +9,14 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+### Breaking
+
+- No default feature anymore: consumers must enable exactly one of the
+  `rp2040` / `rp2350` features. A plain `drooling = "0.1"` dependency no
+  longer compiles for firmware targets; write
+  `drooling = { version = "0.2", features = ["rp2040"] }` (or `rp2350`).
+  Host builds without a chip feature remain valid.
+
 ### Changed
 
 - The RP2040 demo is renamed from `examples/demo.rs` to

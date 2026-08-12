@@ -19,12 +19,14 @@ Windows は WinUSB を自動バインドする — Zadig や手動ドライバ�
 ```toml
 # Cargo.toml
 [dependencies]
-# RP2040 (既定)
-drooling = "0.1"
+# RP2040
+drooling = { version = "0.2", features = ["rp2040"] }
 
-# RP2350 — チップの feature は相互排他なので既定を切る
-drooling = { version = "0.1", default-features = false, features = ["rp2350"] }
+# RP2350
+drooling = { version = "0.2", features = ["rp2350"] }
 ```
+
+チップの feature は相互排他で既定は無いため、どちらか一方を必ず選ぶ。
 
 ```rust
 use drooling::PicotoolReset;
@@ -76,7 +78,7 @@ Waveshare RP2040-ETH(ユーザー LED なし、USB と再書き込み動作を�
 BOOTSEL モードにしてから:
 
 ```sh
-cargo run --release --example demo_rp2040
+cargo run --release --example demo_rp2040 --features rp2040
 ```
 
 2回目以降は同じコマンドだけ、ボタン不要。cargo runner(`flash.cmd`)が
@@ -96,7 +98,7 @@ Waveshare RP2350-GEEK(RP2350A、W25Q128JV 16MB フラッシュ、ユーザー LE
 
 ```sh
 cargo run --release --example demo_rp2350 \
-    --no-default-features --features rp2350 \
+    --features rp2350 \
     --target thumbv8m.main-none-eabihf
 ```
 

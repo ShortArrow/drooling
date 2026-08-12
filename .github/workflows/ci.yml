@@ -31,15 +31,18 @@ jobs:
       - name: Install flip-link
         run: cargo install flip-link
       - name: Build library and demo (RP2040, thumbv6m)
-        run: cargo build --release --example demo_rp2040
+        run: cargo build --release --example demo_rp2040 --features rp2040
       - name: Build library and demo (RP2350, thumbv8m)
-        run: cargo build --release --example demo_rp2350 --no-default-features --features rp2350 --target thumbv8m.main-none-eabihf
+        run: cargo build --release --example demo_rp2350 --features rp2350 --target thumbv8m.main-none-eabihf
       # Host tests need an explicit target: .cargo/config.toml defaults the
       # build target to thumbv6m-none-eabi.
       - name: Host tests (descriptor structure, rp2040)
-        run: cargo test --lib --target ${{ matrix.host-target }}
+        run: cargo test --lib --features rp2040 --target ${{ matrix.host-target }}
       - name: Host tests (descriptor structure, rp2350)
-        run: cargo test --lib --no-default-features --features rp2350 --target ${{ matrix.host-target }}
+        run: cargo test --lib --features rp2350 --target ${{ matrix.host-target }}
+      # No chip feature: what `cargo publish`'s verify build compiles.
+      - name: Host tests (descriptor structure, no chip feature)
+        run: cargo test --lib --target ${{ matrix.host-target }}
 
   docs-tandem:
     name: Bilingual docs updated together
