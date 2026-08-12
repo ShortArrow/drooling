@@ -9,6 +9,8 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-12
+
 ### Breaking
 
 - No default feature anymore: consumers must enable exactly one of the
