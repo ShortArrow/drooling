@@ -13,10 +13,10 @@ Windows のみ。
 - プラットフォーム別の runner 設定を文書化する(2段階の `flash.cmd`
   フローが必要なのは Windows だけ)
 
-## RP2350 対応
+## RP2350 の RISC-V 対応
 
-- `picotool_reset` を `rp235x-hal` に移植する(boot ROM API が異なる)
-- RP2350 は Windows での picotool 制限が少ないため、書き込みフローを再検討
+- RP2350 のもう一方のアーキテクチャ `riscv32imac-unknown-none-elf` 向けに
+  デモをビルドして検証する(ARM (thumbv8m) 版は完了済み)
 
 ## デモの近代化
 

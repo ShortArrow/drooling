@@ -16,3 +16,4 @@ Japanese (`NNNN-slug.jp.md`, indexed in `README.jp.md`).
 | [0002](0002-windows-two-step-flash.md) | Automate the Windows reboot-then-load flow with flash.cmd | Accepted |
 | [0003](0003-host-side-descriptor-tests.md) | Validate hand-written descriptors with host-side structural tests | Accepted |
 | [0004](0004-library-boundary.md) | Library boundary: rp2040-hal dependency, BSP-free, demo in examples/ | Accepted |
+| [0005](0005-chip-selection-features.md) | Select the chip (RP2040 / RP2350) with mutually exclusive cargo features | Accepted |

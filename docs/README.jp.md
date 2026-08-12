@@ -19,7 +19,11 @@ Windows は WinUSB を自動バインドする — Zadig や手動ドライバ�
 ```toml
 # Cargo.toml
 [dependencies]
+# RP2040 (既定)
 drooling = "0.1"
+
+# RP2350 — チップの feature は相互排他なので既定を切る
+drooling = { version = "0.1", default-features = false, features = ["rp2350"] }
 ```
 
 ```rust
@@ -56,8 +60,8 @@ loop {
 
 ## 必要なもの
 
-- Rust toolchain(`thumbv6m-none-eabi` ターゲットは
-  `rust-toolchain.toml` により rustup が自動導入)
+- Rust toolchain(`thumbv6m-none-eabi` と `thumbv8m.main-none-eabihf`
+  ターゲットは `rust-toolchain.toml` により rustup が自動導入)
 - `flip-link`: `cargo install flip-link`
 - `picotool` v2.x(PATH が通っていること)
 
@@ -82,6 +86,28 @@ cargo run --release --example demo
 > **Windows の注意**: picotool は RP2040 + Windows でワンショットの
 > forced command(`picotool load -f`)を拒否するため、既定の runner は
 > サポートされている2段階フロー(`reboot -f -u` → `load`)を使う。
+> これは RP2040 のみの話で、RP2350 については下記の節を参照。
+
+### RP2350
+
+`examples/demo_rp2350.rs` は同じ複合デバイスの RP2350 版。
+Waveshare RP2350-GEEK(RP2350A、W25Q128JV 16MB フラッシュ、ユーザー LED
+なし、USB と再書き込み動作を検証)で検証済み。ビルドと書き込み:
+
+```sh
+cargo run --release --example demo_rp2350 \
+    --no-default-features --features rp2350 \
+    --target thumbv8m.main-none-eabihf
+```
+
+VID:PID `2e8a:0009`(「Pico 2」)として列挙され、CDC シリアル + reset
+interface の構成は同じ。Windows は同じ MS OS 2.0 ディスクリプタにより
+WinUSB を自動バインドする。
+
+RP2350 では上記の Windows 制限が当てはまらない: ワンショットの
+`picotool load -f -x -t elf` が、実行中ファームの BOOTSEL 再起動・書き込み・
+アプリケーション再開を1コマンドで行う。`flash.cmd` は両チップ共通の既定
+runner のままで、RP2350 でも問題なく動作する。
 
 > **Linux/macOS の注意**: `tools/flash.cmd` は Windows バッチファイル。
 > `.cargo/config.toml` の `runner` 行をワンショットの
@@ -107,7 +133,9 @@ VID でも class triple(`FF/00/01`)で reset interface を発見する。
 
 `picotool reboot -f -u` は vendor interface へ class request を送り、
 ファームウェアが boot ROM の `reset_to_usb_boot()` を呼んで BOOTSEL
-デバイスとして再列挙する(`src/picotool_reset.rs`)。
+デバイスとして再列挙する(`src/picotool_reset.rs`)。RP2350 では代わりに
+boot ROM の reboot API を呼び、要求に含まれる GPIO アクティビティピンは
+受け取った上で無視する — この API にはそのパラメータがない。
 
 Windows が vendor interface に WinUSB を自動バインドできるよう、
 Microsoft OS 2.0 ディスクリプタを提供する(`src/ms_os_20.rs`):
@@ -137,13 +165,15 @@ ID・COM ポート・エラーなしで WinUSB にバインドされた「Reset�
 │   ├── picotool_reset.rs     # reset interface UsbClass (MS OS 2.0 応答含む)
 │   ├── protocol.rs           # reset 要求のワイヤ形式パース + テスト
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 ディスクリプタ + 構造テスト
-├── examples/demo.rs          # CDC シリアル + reset interface + LED
+├── examples/
+│   ├── demo.rs               # RP2040: CDC シリアル + reset interface + LED
+│   └── demo_rp2350.rs        # RP2350: CDC シリアル + reset interface
 ├── tools/flash.cmd           # ボタンレス書き込みスクリプト (reboot -f -u → load)
-├── .cargo/config.toml        # picotool runner + ビルドターゲット
+├── .cargo/config.toml        # picotool runner + チップ別ビルド設定
 ├── docs/                     # 日本語 README, CONTRIBUTING, ROADMAP, ADR,
 │                             #   CHANGELOG, 調査記録 (CONCLUSION.md)
 ├── variants/                 # 過去の実験バイナリ (ビルド対象外)
-└── memory.x                  # RP2040 メモリレイアウト
+└── memory/                   # チップ別リンカメモリレイアウト
 ```
 
 ## ライセンス

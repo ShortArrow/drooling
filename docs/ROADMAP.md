@@ -13,10 +13,10 @@ verified end to end.
 - Document a runner setup per platform (the two-step `flash.cmd` flow is
   only needed on Windows)
 
-## RP2350 support
+## RISC-V flavor of RP2350
 
-- Port `picotool_reset` to `rp235x-hal` (boot ROM API differs)
-- picotool has fewer Windows restrictions on RP2350; revisit the flash flow
+- Build and verify the demo for `riscv32imac-unknown-none-elf`, the
+  RP2350's second architecture; the ARM (thumbv8m) flavor is done
 
 ## Demo modernization
 

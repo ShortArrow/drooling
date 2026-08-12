@@ -9,6 +9,20 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+### Added
+
+- RP2350 support behind the opt-in `rp2350` feature, using the RP2350 boot
+  ROM's reboot API. `rp2040` stays the default feature, so existing RP2040
+  consumers are unchanged. The features are mutually exclusive.
+- `examples/demo_rp2350.rs` (thumbv8m.main-none-eabihf, VID:PID 2e8a:0009),
+  verified on a Waveshare RP2350-GEEK: enumeration with automatic WinUSB
+  binding, button-free reflash, and — RP2350 only — single-shot
+  `picotool load -f` on Windows.
+- Per-chip linker memory layouts under `memory/`, selected together with
+  the chip-specific rustflags by cfg() predicates in `.cargo/config.toml`
+  (a config section named after the dotted thumbv8m triple is silently
+  ignored by cargo).
+
 ## [0.1.2] — 2026-08-11
 
 ### Fixed
