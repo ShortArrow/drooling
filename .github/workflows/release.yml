@@ -47,11 +47,13 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: thumbv6m-none-eabi
+          targets: thumbv6m-none-eabi,thumbv8m.main-none-eabihf
       - name: Install flip-link
         run: cargo install flip-link
       - run: cargo build --release --locked --example demo
+      - run: cargo build --release --locked --example demo_rp2350 --no-default-features --features rp2350 --target thumbv8m.main-none-eabihf
       - run: cargo test --lib --locked --target ${{ matrix.host-target }}
+      - run: cargo test --lib --locked --no-default-features --features rp2350 --target ${{ matrix.host-target }}
 
   build:
     # The library itself ships as source via crates.io; the release artifact
@@ -65,24 +67,29 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: thumbv6m-none-eabi
+          targets: thumbv6m-none-eabi,thumbv8m.main-none-eabihf
       - uses: Swatinem/rust-cache@v2
       # elf2uf2-rs links libudev for its serial-port feature.
       - name: Install Linux build deps
         run: sudo apt-get update && sudo apt-get install -y libudev-dev
       - name: Install flip-link and elf2uf2-rs
         run: cargo install flip-link elf2uf2-rs
-      - name: Build demo (thumbv6m)
+      - name: Build demo (RP2040, thumbv6m)
         run: cargo build --release --locked --example demo
-      - name: Package ELF + UF2
+      - name: Build demo (RP2350, thumbv8m)
+        run: cargo build --release --locked --example demo_rp2350 --no-default-features --features rp2350 --target thumbv8m.main-none-eabihf
+      # elf2uf2-rs converts RP2040 binaries only; the RP2350 demo ships as
+      # an ELF for `picotool load -x -t elf`.
+      - name: Package artifacts
         run: |
           cp target/thumbv6m-none-eabi/release/examples/demo drooling-demo.elf
           elf2uf2-rs drooling-demo.elf drooling-demo.uf2
+          cp target/thumbv8m.main-none-eabihf/release/examples/demo_rp2350 drooling-demo-rp2350.elf
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: drooling-demo
-          path: drooling-demo.*
+          path: drooling-demo*
 
   release:
     name: Create Release
@@ -146,7 +153,7 @@ jobs:
       # thumbv6m-none-eabi, so `cargo publish`'s verify build needs it.
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: thumbv6m-none-eabi
+          targets: thumbv6m-none-eabi,thumbv8m.main-none-eabihf
 
       - name: Exchange OIDC token for crates.io token
         id: auth
