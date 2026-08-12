@@ -175,7 +175,11 @@ jobs:
           if [ "$status" = "200" ]; then
             echo "drooling $version already on crates.io — skipping dry-run"
           else
-            cargo publish --dry-run
+            # --target: the verify build otherwise inherits the repo's
+            # default thumbv6m target and hits the chip-less compile_error;
+            # the packaged crate ships no .cargo config, so a host build is
+            # what consumers' tooling verifies too.
+            cargo publish --dry-run --target x86_64-unknown-linux-gnu
           fi
 
       - name: Publish drooling
@@ -189,5 +193,5 @@ jobs:
           if [ "$status" = "200" ]; then
             echo "drooling $version already on crates.io — skipping publish"
           else
-            cargo publish
+            cargo publish --target x86_64-unknown-linux-gnu
           fi
