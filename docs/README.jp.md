@@ -67,7 +67,7 @@ loop {
 
 ## 同梱デモの実行
 
-`examples/demo.rs` は完全な複合デバイス(CDC シリアル + reset interface +
+`examples/demo_rp2040.rs` は完全な複合デバイス(CDC シリアル + reset interface +
 LED 点滅)。Seeed XIAO RP2040(LED は GPIO25、アクティブ Low)と
 Waveshare RP2040-ETH(ユーザー LED なし、USB と再書き込み動作を検証)で
 検証済み。
@@ -76,7 +76,7 @@ Waveshare RP2040-ETH(ユーザー LED なし、USB と再書き込み動作を�
 BOOTSEL モードにしてから:
 
 ```sh
-cargo run --release --example demo
+cargo run --release --example demo_rp2040
 ```
 
 2回目以降は同じコマンドだけ、ボタン不要。cargo runner(`flash.cmd`)が
@@ -166,7 +166,7 @@ ID・COM ポート・エラーなしで WinUSB にバインドされた「Reset�
 │   ├── protocol.rs           # reset 要求のワイヤ形式パース + テスト
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 ディスクリプタ + 構造テスト
 ├── examples/
-│   ├── demo.rs               # RP2040: CDC シリアル + reset interface + LED
+│   ├── demo_rp2040.rs        # RP2040: CDC シリアル + reset interface + LED
 │   └── demo_rp2350.rs        # RP2350: CDC シリアル + reset interface
 ├── tools/flash.cmd           # ボタンレス書き込みスクリプト (reboot -f -u → load)
 ├── .cargo/config.toml        # picotool runner + チップ別ビルド設定

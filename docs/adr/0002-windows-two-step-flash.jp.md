@@ -34,6 +34,6 @@ Git Bash 環境では GNU timeout に解決されて引数が非互換になる�
 
 ## Consequences
 
-- Windows では `cargo run --release --example demo` 一発でボタンレス書き込み。
+- Windows では `cargo run --release --example demo_rp2040` 一発でボタンレス書き込み。
 - Linux/macOS はこの制限がないため、runner を `picotool load -f -x -t elf`
   へ差し替えれば1コマンドで済むはず(未検証、ROADMAP 参照)。

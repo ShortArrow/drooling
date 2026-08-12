@@ -2,16 +2,17 @@
 
 ## Development setup
 
-Requirements: Rust (stable) with the `thumbv6m-none-eabi` target,
-`flip-link`, `picotool` v2.x in PATH, and an RP2040 board.
+Requirements: Rust (stable), `flip-link`, `picotool` v2.x in PATH,
+and an RP2040 or RP2350 board.
 
 ```console
 $ cargo install flip-link
-$ cargo run --release --example demo   # flashes the demo (see README for the first-flash step)
+$ cargo run --release --example demo_rp2040   # flashes the demo (see README for the first-flash step)
 ```
 
 `rust-toolchain.toml` makes rustup install the `thumbv6m-none-eabi`
-target automatically.
+and `thumbv8m.main-none-eabihf` targets automatically. For RP2350, run
+the `demo_rp2350` example instead (see the README for the flags).
 
 ## Architecture
 

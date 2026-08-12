@@ -50,7 +50,7 @@ jobs:
           targets: thumbv6m-none-eabi,thumbv8m.main-none-eabihf
       - name: Install flip-link
         run: cargo install flip-link
-      - run: cargo build --release --locked --example demo
+      - run: cargo build --release --locked --example demo_rp2040
       - run: cargo build --release --locked --example demo_rp2350 --no-default-features --features rp2350 --target thumbv8m.main-none-eabihf
       - run: cargo test --lib --locked --target ${{ matrix.host-target }}
       - run: cargo test --lib --locked --no-default-features --features rp2350 --target ${{ matrix.host-target }}
@@ -75,14 +75,14 @@ jobs:
       - name: Install flip-link and elf2uf2-rs
         run: cargo install flip-link elf2uf2-rs
       - name: Build demo (RP2040, thumbv6m)
-        run: cargo build --release --locked --example demo
+        run: cargo build --release --locked --example demo_rp2040
       - name: Build demo (RP2350, thumbv8m)
         run: cargo build --release --locked --example demo_rp2350 --no-default-features --features rp2350 --target thumbv8m.main-none-eabihf
       # elf2uf2-rs converts RP2040 binaries only; the RP2350 demo ships as
       # an ELF for `picotool load -x -t elf`.
       - name: Package artifacts
         run: |
-          cp target/thumbv6m-none-eabi/release/examples/demo drooling-demo.elf
+          cp target/thumbv6m-none-eabi/release/examples/demo_rp2040 drooling-demo.elf
           elf2uf2-rs drooling-demo.elf drooling-demo.uf2
           cp target/thumbv8m.main-none-eabihf/release/examples/demo_rp2350 drooling-demo-rp2350.elf
       - name: Upload artifact

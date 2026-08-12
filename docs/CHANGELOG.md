@@ -9,6 +9,12 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+### Changed
+
+- The RP2040 demo is renamed from `examples/demo.rs` to
+  `examples/demo_rp2040.rs`, mirroring `demo_rp2350.rs`
+  (`cargo run --release --example demo_rp2040`).
+
 ### Added
 
 - RP2350 support behind the opt-in `rp2350` feature, using the RP2350 boot

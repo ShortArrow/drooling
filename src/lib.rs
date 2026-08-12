@@ -24,7 +24,7 @@
 //! preferably continuously from the main loop or a USB interrupt — or
 //! enumeration and reset requests will be missed.
 //!
-//! See `examples/demo.rs` for a complete composite device (CDC serial +
+//! See `examples/demo_rp2040.rs` for a complete composite device (CDC serial +
 //! reset interface + LED) and `examples/demo_rp2350.rs` for the RP2350
 //! flavor (feature `rp2350`, mutually exclusive with the default `rp2040`).
 

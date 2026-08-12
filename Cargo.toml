@@ -42,7 +42,7 @@ rp-pico = "0.9"
 rp235x-hal = { version = "0.4", features = ["rt", "critical-section-impl"] }
 
 [[example]]
-name = "demo"
+name = "demo_rp2040"
 required-features = ["rp2040"]
 
 [[example]]

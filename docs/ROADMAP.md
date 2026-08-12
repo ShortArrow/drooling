@@ -20,7 +20,7 @@ verified end to end.
 
 ## Demo modernization
 
-- Replace the `static mut` USB bus allocator pattern in `examples/demo.rs`
+- Replace the `static mut` USB bus allocator pattern in `examples/demo_rp2040.rs`
   with a warning-free idiom
 - Consider an `embassy-usb` variant of the reset interface (embassy has
   first-class MS OS 2.0 support in its `msos` module)

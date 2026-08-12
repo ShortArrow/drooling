@@ -31,7 +31,7 @@ jobs:
       - name: Install flip-link
         run: cargo install flip-link
       - name: Build library and demo (RP2040, thumbv6m)
-        run: cargo build --release --example demo
+        run: cargo build --release --example demo_rp2040
       - name: Build library and demo (RP2350, thumbv8m)
         run: cargo build --release --example demo_rp2350 --no-default-features --features rp2350 --target thumbv8m.main-none-eabihf
       # Host tests need an explicit target: .cargo/config.toml defaults the

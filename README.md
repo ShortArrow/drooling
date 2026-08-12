@@ -70,7 +70,7 @@ For button-free `cargo run`, copy `tools/flash.cmd` and the `runner` line of
 
 ## Running the bundled demo
 
-`examples/demo.rs` is a complete composite device (CDC serial + reset
+`examples/demo_rp2040.rs` is a complete composite device (CDC serial + reset
 interface + LED blink), verified on a Seeed XIAO RP2040 (LED on GPIO25,
 active-low) and a Waveshare RP2040-ETH (no user LED; USB and reflash
 behavior verified).
@@ -79,7 +79,7 @@ First flash (BOOTSEL button required once): enter BOOTSEL mode by holding
 BOOT while pressing RESET, then:
 
 ```sh
-cargo run --release --example demo
+cargo run --release --example demo_rp2040
 ```
 
 Every flash after that: same command, no buttons. The cargo runner
@@ -170,7 +170,7 @@ device with a serial-number-based instance ID, a COM port, and an error-free
 │   ├── protocol.rs           # reset request wire-format parsing + tests
 │   └── ms_os_20.rs           # BOS / MS OS 2.0 descriptors + structural tests
 ├── examples/
-│   ├── demo.rs               # RP2040: CDC serial + reset interface + LED
+│   ├── demo_rp2040.rs        # RP2040: CDC serial + reset interface + LED
 │   └── demo_rp2350.rs        # RP2350: CDC serial + reset interface
 ├── tools/flash.cmd           # button-free flash script (reboot -f -u, then load)
 ├── .cargo/config.toml        # picotool runner + per-chip build config

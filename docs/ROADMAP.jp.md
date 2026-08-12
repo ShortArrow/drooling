@@ -20,7 +20,7 @@ Windows のみ。
 
 ## デモの近代化
 
-- `examples/demo.rs` の `static mut` な USB バスアロケータパターンを
+- `examples/demo_rp2040.rs` の `static mut` な USB バスアロケータパターンを
   警告なしのイディオムに置き換える
 - reset interface の `embassy-usb` 版を検討する(embassy は `msos`
   モジュールで MS OS 2.0 を第一級サポート)

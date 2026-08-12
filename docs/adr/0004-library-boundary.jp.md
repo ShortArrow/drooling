@@ -15,7 +15,7 @@ Accepted (2026-07-25)
 - **lib の依存は `rp2040-hal` + `usb-device` + `cortex-m` のみ。**
   boot ROM 呼び出しは `rp2040_hal::rom_data` を使い、特定ボードの BSP に
   依存しない。
-- **デモは `examples/demo.rs`**(`cargo run --release --example demo`)。
+- **デモは `examples/demo_rp2040.rs`**(`cargo run --release --example demo_rp2040`)。
   BSP(`rp-pico`)・`usbd-serial` 等のデモ専用依存は `[dev-dependencies]`
   に置き、利用側の依存グラフを汚さない。
 - **crates.io パッケージは `src/` + README + LICENSE のみ**
