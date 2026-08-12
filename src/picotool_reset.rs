@@ -3,7 +3,6 @@
 //! Implements vendor-specific reset interface with BOS and MS OS 2.0 descriptors
 //! for automatic WinUSB driver loading on Windows.
 
-use rp2040_hal::rom_data;
 use usb_device::class_prelude::*;
 use usb_device::control;
 use usb_device::descriptor::BosWriter;
@@ -142,11 +141,7 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
                 cortex_m::asm::delay(1000000); // ~8ms at 125MHz
 
                 // Enter BOOTSEL mode
-                rom_data::reset_to_usb_boot(gpio_activity, disable_interface_mask);
-
-                // Will never return
-                #[allow(clippy::empty_loop)]
-                loop {}
+                enter_bootsel(gpio_activity, disable_interface_mask)
             }
 
             RESET_REQUEST_FLASH => {
@@ -159,19 +154,7 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
                 cortex_m::asm::delay(1000000); // ~8ms at 125MHz
 
                 // Reset to flash (normal boot)
-                // Trigger a watchdog reset
-                unsafe {
-                    const WATCHDOG_BASE: u32 = 0x40058000;
-                    const CTRL_OFFSET: u32 = 0x00;
-                    const CTRL_TRIGGER_BIT: u32 = 1 << 31;
-
-                    let ctrl_reg = (WATCHDOG_BASE + CTRL_OFFSET) as *mut u32;
-                    ctrl_reg.write_volatile(CTRL_TRIGGER_BIT);
-                }
-
-                // Will never return
-                #[allow(clippy::empty_loop)]
-                loop {}
+                reboot_to_application()
             }
 
             _ => {
@@ -180,4 +163,55 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
             }
         }
     }
+}
+
+/// Enter BOOTSEL mode. Never returns.
+#[cfg(feature = "rp2040")]
+fn enter_bootsel(gpio_activity_pin_mask: u32, disable_interface_mask: u32) -> ! {
+    rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
+
+    // rp2040-hal 0.10 types this as `()`, 0.12 as `!`; the loop makes both compile.
+    #[allow(clippy::empty_loop)]
+    loop {}
+}
+
+/// Enter BOOTSEL mode. Never returns.
+///
+/// RP2350 has no GPIO activity pin parameter, so that mask is ignored.
+#[cfg(feature = "rp2350")]
+fn enter_bootsel(_gpio_activity_pin_mask: u32, disable_interface_mask: u32) -> ! {
+    rp235x_hal::reboot::reboot(
+        rp235x_hal::reboot::RebootKind::BootSel {
+            msd_disabled: disable_interface_mask & 0x01 != 0,
+            picoboot_disabled: disable_interface_mask & 0x02 != 0,
+        },
+        rp235x_hal::reboot::RebootArch::Normal,
+    )
+}
+
+/// Reboot into the flashed application. Never returns.
+#[cfg(feature = "rp2040")]
+fn reboot_to_application() -> ! {
+    // Trigger a watchdog reset
+    unsafe {
+        const WATCHDOG_BASE: u32 = 0x40058000;
+        const CTRL_OFFSET: u32 = 0x00;
+        const CTRL_TRIGGER_BIT: u32 = 1 << 31;
+
+        let ctrl_reg = (WATCHDOG_BASE + CTRL_OFFSET) as *mut u32;
+        ctrl_reg.write_volatile(CTRL_TRIGGER_BIT);
+    }
+
+    // Will never return
+    #[allow(clippy::empty_loop)]
+    loop {}
+}
+
+/// Reboot into the flashed application. Never returns.
+#[cfg(feature = "rp2350")]
+fn reboot_to_application() -> ! {
+    rp235x_hal::reboot::reboot(
+        rp235x_hal::reboot::RebootKind::Normal,
+        rp235x_hal::reboot::RebootArch::Normal,
+    )
 }

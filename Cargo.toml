@@ -12,19 +12,42 @@ categories = ["embedded", "no-std", "hardware-support"]
 # compile on the host, which would fail `cargo publish`'s verify build.
 include = ["/src", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE"]
 
+[features]
+default = ["rp2040"]
+rp2040 = ["dep:rp2040-hal"]
+rp2350 = ["dep:rp235x-hal"]
+
 [dependencies]
 usb-device = { version = "0.3", features = ["control-buffer-256"] }
 # Only rom_data::reset_to_usb_boot is used; its signature is identical
 # across 0.10-0.12, so consumers may resolve any of them.
-rp2040-hal = ">=0.10, <0.13"
+rp2040-hal = { version = ">=0.10, <0.13", optional = true }
+rp235x-hal = { version = "0.4", optional = true }
 cortex-m = "0.7"
 
 [dev-dependencies]
 cortex-m-rt = "0.7"
 embedded-hal = "1.0.0"
-rp-pico = "0.9"
 panic-halt = "0.2"
 usbd-serial = "0.2"
+
+# Chip-specific example dependencies are scoped by target triple.
+# rp235x-pac 0.2 selects its cortex-m sources for any `target_arch = "arm"`
+# but only declares the `cortex-m` dependency for `thumbv8m.main-*`, so it
+# fails to compile if it is pulled into the thumbv6m (RP2040) build.
+[target.thumbv6m-none-eabi.dev-dependencies]
+rp-pico = "0.9"
+
+[target.'thumbv8m.main-none-eabihf'.dev-dependencies]
+rp235x-hal = { version = "0.4", features = ["rt", "critical-section-impl"] }
+
+[[example]]
+name = "demo"
+required-features = ["rp2040"]
+
+[[example]]
+name = "demo_rp2350"
+required-features = ["rp2350"]
 
 [profile.dev]
 opt-level = 1

@@ -1,4 +1,12 @@
-[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# Cargo (verified on 1.97.1) silently ignores a config section named
+# [target.'thumbv8m.main-none-eabihf'] — the dots in the triple break the
+# config-key matching, dropping both the runner and rustflags. Both chips
+# are therefore selected with cfg() predicates: the RP2040 target is
+# thumbv6m-none-eabi (abi "eabi"), the RP2350 ARM target is
+# thumbv8m.main-none-eabihf (abi "eabihf").
+
+# RP2040 (thumbv6m-none-eabi)
+[target.'cfg(all(target_arch = "arm", target_os = "none", target_abi = "eabi"))']
 # Button-free flash. First flash still needs the BOOTSEL button.
 # Windows: two-step reboot+load script (picotool rejects single-shot
 # forced commands for RP2040 on Windows).
@@ -9,6 +17,22 @@ rustflags = [
   "-C", "linker=flip-link",
   "-C", "link-arg=-Tlink.x",
   "-C", "link-arg=--nmagic",
+  # flip-link 0.1.10 parses the separated `-L <path>` form only; a joined
+  # `-L<path>` is ignored by its linker-script scanner and the build fails
+  # with "MEMORY.RAM not found after scanning linker scripts".
+  "-C", "link-arg=-L",
+  "-C", "link-arg=memory/rp2040",
+]
+
+# RP2350 ARM (thumbv8m.main-none-eabihf)
+[target.'cfg(all(target_arch = "arm", target_os = "none", target_abi = "eabihf"))']
+runner = "./tools/flash.cmd"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=--nmagic",
+  "-C", "link-arg=-L",
+  "-C", "link-arg=memory/rp2350",
 ]
 
 [build]

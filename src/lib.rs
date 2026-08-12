@@ -25,9 +25,13 @@
 //! enumeration and reset requests will be missed.
 //!
 //! See `examples/demo.rs` for a complete composite device (CDC serial +
-//! reset interface + LED).
+//! reset interface + LED) and `examples/demo_rp2350.rs` for the RP2350
+//! flavor (feature `rp2350`, mutually exclusive with the default `rp2040`).
 
 #![cfg_attr(not(test), no_std)]
+
+#[cfg(all(feature = "rp2040", feature = "rp2350"))]
+compile_error!("features `rp2040` and `rp2350` are mutually exclusive");
 
 pub mod ms_os_20;
 pub mod protocol;
