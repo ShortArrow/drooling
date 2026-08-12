@@ -57,12 +57,21 @@ loop {
 列挙失敗、もしくは WinUSB が付かない)。`usb-device` の必須 feature
 `control-buffer-256` は、このクレートへの依存で自動的に有効になる。
 
-ボタンレス `cargo run` にするには、`.cargo/config.toml` の `runner` 行を
-本リポジトリ同梱の書き込みツール `drool`(`tools/drool`)に向ける。
-まだ crates.io には出していないため、`cargo install drool` が使えるように
-なるまではこのリポジトリのチェックアウトからビルドする(ここで使っている
-設定は `cargo run -q -p drool -- run`)。picotool のままにしたい場合は、
-`tools/flash.cmd` とコメントアウトされた runner 行をコピーすればよい。
+ボタンレス `cargo run` にするには、書き込みツールを導入して `runner` を
+向けるだけ:
+
+```sh
+cargo install drool
+```
+
+```toml
+# .cargo/config.toml
+runner = "drool run"
+```
+
+(本リポジトリ自身は同梱コピーを `cargo run -q -p drool -- run` で
+使っている。)picotool のままにしたい場合は、`tools/flash.cmd` と
+コメントアウトされた runner 行をコピーすればよい。
 
 ## 必要なもの
 

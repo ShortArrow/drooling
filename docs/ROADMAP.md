@@ -27,8 +27,8 @@ verified end to end.
 
 ## Publish drool
 
-- Publish `drool` to crates.io: the first publish by hand, then wire
-  Trusted Publishing and the release workflow; prebuilt binaries can
+- Wire `drool` (on crates.io since 0.1.0) into Trusted Publishing and
+  the release workflow; prebuilt binaries can
   follow
 
 ## Repository hygiene

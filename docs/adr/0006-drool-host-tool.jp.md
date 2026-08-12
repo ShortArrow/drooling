@@ -47,6 +47,6 @@ Rust で完結させること。バッチファイルへの依存は Windows 以
 - Linux/macOS は純 Rust ゆえ動作するはずだが実機未検証。Linux では
   実行中デバイスの reset interface と BOOTSEL デバイスの両方に udev rules
   が要る。
-- drool は crates.io 未公開。利用側は当面このリポジトリからビルドする。
+- drool は crates.io で公開しており、利用側は `cargo install drool` で導入して `runner = "drool run"` を設定できる。
   公開後は `cargo install drool` と `runner = "drool run"` だけで済むように
   なる。

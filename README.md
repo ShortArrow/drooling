@@ -60,13 +60,21 @@ enumeration fails or WinUSB is not bound if any is missing. The required
 `usb-device` feature `control-buffer-256` is enabled transitively by
 depending on this crate.
 
-For button-free `cargo run`, point the `runner` line of your
-`.cargo/config.toml` at `drool`, the flasher bundled in this repository
-under `tools/drool`. It is not on crates.io yet, so build it from a
-checkout of this repo (`cargo run -q -p drool -- run`, the setting used
-here) until `cargo install drool` becomes available. Copying
-`tools/flash.cmd` and its commented runner line still works if you would
-rather stay on picotool.
+For button-free `cargo run`, install the flasher and point your
+`runner` at it:
+
+```sh
+cargo install drool
+```
+
+```toml
+# .cargo/config.toml
+runner = "drool run"
+```
+
+(This repository runs its bundled copy as `cargo run -q -p drool -- run`
+instead.) Copying `tools/flash.cmd` and its commented runner line still
+works if you would rather stay on picotool.
 
 ## Requirements
 

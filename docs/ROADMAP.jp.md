@@ -27,8 +27,8 @@ Windows のみ。
 
 ## drool の公開
 
-- `drool` を crates.io へ公開する: 初回は手動で publish し、その後
-  Trusted Publishing とリリースワークフローに組み込む(ビルド済み
+- `drool`(0.1.0 から crates.io 公開済み)を Trusted Publishing と
+  リリースワークフローに組み込む(ビルド済み
   バイナリの配布はその後でよい)
 
 ## リポジトリ整理
