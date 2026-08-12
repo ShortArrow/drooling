@@ -57,15 +57,20 @@ loop {
 列挙失敗、もしくは WinUSB が付かない)。`usb-device` の必須 feature
 `control-buffer-256` は、このクレートへの依存で自動的に有効になる。
 
-ボタンレス `cargo run` にするには、`tools/flash.cmd` と `.cargo/config.toml` の
-`runner` 行を自分のプロジェクトへコピーする。
+ボタンレス `cargo run` にするには、`.cargo/config.toml` の `runner` 行を
+本リポジトリ同梱の書き込みツール `drool`(`tools/drool`)に向ける。
+まだ crates.io には出していないため、`cargo install drool` が使えるように
+なるまではこのリポジトリのチェックアウトからビルドする(ここで使っている
+設定は `cargo run -q -p drool -- run`)。picotool のままにしたい場合は、
+`tools/flash.cmd` とコメントアウトされた runner 行をコピーすればよい。
 
 ## 必要なもの
 
 - Rust toolchain(`thumbv6m-none-eabi` と `thumbv8m.main-none-eabihf`
   ターゲットは `rust-toolchain.toml` により rustup が自動導入)
 - `flip-link`: `cargo install flip-link`
-- `picotool` v2.x(PATH が通っていること)
+- `picotool` v2.x(PATH が通っていること)— 任意、`flash.cmd`
+  フォールバック用
 
 ## 同梱デモの実行
 
@@ -78,17 +83,30 @@ Waveshare RP2040-ETH(ユーザー LED なし、USB と再書き込み動作を�
 BOOTSEL モードにしてから:
 
 ```sh
-cargo run --release --example demo_rp2040 --features rp2040
+cargo rp2040
 ```
 
-2回目以降は同じコマンドだけ、ボタン不要。cargo runner(`flash.cmd`)が
-実行中ファームに `picotool reboot -f -u` を送り、BOOTSEL の列挙を待って
-新しいバイナリを書き込む。
+2回目以降は同じコマンドだけ、ボタン不要。
 
-> **Windows の注意**: picotool は RP2040 + Windows でワンショットの
-> forced command(`picotool load -f`)を拒否するため、既定の runner は
-> サポートされている2段階フロー(`reboot -f -u` → `load`)を使う。
-> これは RP2040 のみの話で、RP2350 については下記の節を参照。
+### 現在の書き込みの仕組み
+
+cargo runner は `tools/drool` の Rust 製書き込みツール `drool`
+(`cargo run -q -p drool -- run`)。1回の実行で全工程を行う: reset
+interface(class `FF/00/01`、VID/PID は問わない)で実行中デバイスを探し、
+BOOTSEL へ再起動し、ROM の起動を待ち、PICOBOOT で消去・書き込みを行い、
+先頭 256 バイトを読み戻して検証し、アプリケーションへ再起動する。
+既に BOOTSEL 状態のデバイスでは reset 手順を飛ばす。Seeed XIAO RP2040
+(`2e8a:000a`)と Waveshare RP2350-GEEK(`2e8a:0009`)で、どちらの開始
+状態からもエンドツーエンドで検証済み。
+
+`drool` には `reboot [--app]`(書き込みなしの再起動のみ)と
+`flash <ELF> [--no-run]`(最後の再起動を行わない書き込み)もある。
+
+`tools/flash.cmd` は picotool フォールバックとして残っている。picotool が
+RP2040 + Windows でワンショットの forced command(`picotool load -f`)を
+拒否し、2段階の `reboot -f -u` → `load` を要求するために存在するもの。
+この制限はプラットフォームの制約ではなく picotool の方針であり、`drool`
+は Windows の RP2040 でも1コマンドで書き込む。
 
 ### RP2350
 
@@ -97,25 +115,20 @@ Waveshare RP2350-GEEK(RP2350A、W25Q128JV 16MB フラッシュ、ユーザー LE
 なし、USB と再書き込み動作を検証)で検証済み。ビルドと書き込み:
 
 ```sh
-cargo run --release --example demo_rp2350 \
-    --features rp2350 \
-    --target thumbv8m.main-none-eabihf
+cargo rp2350
 ```
 
 VID:PID `2e8a:0009`(「Pico 2」)として列挙され、CDC シリアル + reset
 interface の構成は同じ。Windows は同じ MS OS 2.0 ディスクリプタにより
 WinUSB を自動バインドする。
 
-RP2350 では上記の Windows 制限が当てはまらない: ワンショットの
-`picotool load -f -x -t elf` が、実行中ファームの BOOTSEL 再起動・書き込み・
-アプリケーション再開を1コマンドで行う。`flash.cmd` は両チップ共通の既定
-runner のままで、RP2350 でも問題なく動作する。
+書き込みは上記のとおり — `drool` は両チップ共通の runner で、
+1コマンドのフローは RP2350 でも RP2040 と同じ。
 
-> **Linux/macOS の注意**: `tools/flash.cmd` は Windows バッチファイル。
-> `.cargo/config.toml` の `runner` 行をワンショットの
-> `picotool load -f -x -t elf` に切り替える(コメント行として用意済み)。
-> Linux では vendor interface へアクセスするため picotool の udev rules
-> を追加する(または root で実行)。本プロジェクトでの実機検証は未実施。
+> **Linux/macOS の注意**: `drool` はバッチファイルを介さない純 Rust
+> 実装のため両方で動作するはずだが、本プロジェクトでの検証は Windows
+> のみ。Linux では実行中デバイスの reset interface と BOOTSEL デバイスの
+> 両方に udev rules が必要(または root で実行)。
 
 poll 要件: 接続中は `usb_dev.poll(...)` を最低 10ms ごとに呼ぶ必要が
 ある。メインループを軽く保つか、USB 割り込みから poll すること。
@@ -138,6 +151,11 @@ VID でも class triple(`FF/00/01`)で reset interface を発見する。
 デバイスとして再列挙する(`src/picotool_reset.rs`)。RP2350 では代わりに
 boot ROM の reboot API を呼び、要求に含まれる GPIO アクティビティピンは
 受け取った上で無視する — この API にはそのパラメータがない。
+
+ホスト側では `drool` が同じ class request を `nusb` 経由で送り
+(interface は class triple で探すため VID/PID は問わない)、その後
+boot ROM に対して PICOBOOT を話して消去・書き込み・検証を行う —
+picotool と同じプロトコル。
 
 Windows が vendor interface に WinUSB を自動バインドできるよう、
 Microsoft OS 2.0 ディスクリプタを提供する(`src/ms_os_20.rs`):
@@ -170,8 +188,10 @@ ID・COM ポート・エラーなしで WinUSB にバインドされた「Reset�
 ├── examples/
 │   ├── demo_rp2040.rs        # RP2040: CDC シリアル + reset interface + LED
 │   └── demo_rp2350.rs        # RP2350: CDC シリアル + reset interface
-├── tools/flash.cmd           # ボタンレス書き込みスクリプト (reboot -f -u → load)
-├── .cargo/config.toml        # picotool runner + チップ別ビルド設定
+├── tools/
+│   ├── drool/                # 同梱の Rust 書き込みツール (nusb reset + PICOBOOT)
+│   └── flash.cmd             # picotool フォールバック (reboot -f -u → load)
+├── .cargo/config.toml        # drool runner + チップ別ビルド設定
 ├── docs/                     # 日本語 README, CONTRIBUTING, ROADMAP, ADR,
 │                             #   CHANGELOG, 調査記録 (CONCLUSION.md)
 ├── variants/                 # 過去の実験バイナリ (ビルド対象外)

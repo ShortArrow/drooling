@@ -11,3 +11,4 @@ drooling の設計判断の記録。各 ADR は現状の実装を説明する判
 | [0003](0003-host-side-descriptor-tests.jp.md) | 手書きディスクリプタはホスト側の構造テストで検証する | Accepted |
 | [0004](0004-library-boundary.jp.md) | ライブラリ境界 — rp2040-hal 依存・BSP 非依存・デモは examples/ | Accepted |
 | [0005](0005-chip-selection-features.jp.md) | チップ (RP2040 / RP2350) は相互排他な cargo feature で選択する | Accepted |
+| [0006](0006-drool-host-tool.jp.md) | ホスト側書き込みツール drool を同梱する — nusb で reset、PICOBOOT で書き込み | Accepted |

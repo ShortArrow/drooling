@@ -9,9 +9,9 @@
 ファームウェア側はプラットフォーム非依存だが、エンドツーエンドの検証は
 Windows のみ。
 
-- Linux / macOS でワンショット `picotool load -f` を検証する
-- プラットフォーム別の runner 設定を文書化する(2段階の `flash.cmd`
-  フローが必要なのは Windows だけ)
+- Linux / macOS で `drool` をエンドツーエンドで検証する
+- Linux で reset interface と BOOTSEL デバイスの双方に必要な udev rules
+  を文書化する
 
 ## RP2350 の RISC-V 対応
 
@@ -25,11 +25,11 @@ Windows のみ。
 - reset interface の `embassy-usb` 版を検討する(embassy は `msos`
   モジュールで MS OS 2.0 を第一級サポート)
 
-## ホストツールの all Rust 化
+## drool の公開
 
-- ホスト側の picotool (C++ 製) を Rust ツールで置き換える: vendor reset
-  要求を `nusb` で送り、書き込みは PICOBOOT プロトコルを直接実装して、
-  書き込みフローを単一の Rust バイナリに畳む
+- `drool` を crates.io へ公開する: 初回は手動で publish し、その後
+  Trusted Publishing とリリースワークフローに組み込む(ビルド済み
+  バイナリの配布はその後でよい)
 
 ## リポジトリ整理
 

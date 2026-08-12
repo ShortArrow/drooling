@@ -9,9 +9,9 @@ Grouped by area, not by priority. Settled designs live in [adr/](adr/).
 The firmware side is platform-independent, but only Windows has been
 verified end to end.
 
-- Verify single-shot `picotool load -f` on Linux and macOS
-- Document a runner setup per platform (the two-step `flash.cmd` flow is
-  only needed on Windows)
+- Verify `drool` end to end on Linux and macOS
+- Document the udev rules Linux needs for the reset interface and the
+  BOOTSEL device
 
 ## RISC-V flavor of RP2350
 
@@ -25,11 +25,11 @@ verified end to end.
 - Consider an `embassy-usb` variant of the reset interface (embassy has
   first-class MS OS 2.0 support in its `msos` module)
 
-## All-Rust host tooling
+## Publish drool
 
-- Replace the C++ picotool on the host side with a Rust tool: send the
-  vendor reset request with `nusb` and speak the PICOBOOT protocol for
-  loading, collapsing the flash flow into one Rust binary
+- Publish `drool` to crates.io: the first publish by hand, then wire
+  Trusted Publishing and the release workflow; prebuilt binaries can
+  follow
 
 ## Repository hygiene
 

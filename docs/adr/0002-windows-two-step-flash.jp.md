@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted (2026-07-25)
+Accepted (2026-07-25) — 既定 runner としての役割は 0006 で drool に置き換え。
+flash.cmd は picotool フォールバックとして存続。
 
 ## Context
 

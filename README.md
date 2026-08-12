@@ -60,8 +60,13 @@ enumeration fails or WinUSB is not bound if any is missing. The required
 `usb-device` feature `control-buffer-256` is enabled transitively by
 depending on this crate.
 
-For button-free `cargo run`, copy `tools/flash.cmd` and the `runner` line of
-`.cargo/config.toml` into your project.
+For button-free `cargo run`, point the `runner` line of your
+`.cargo/config.toml` at `drool`, the flasher bundled in this repository
+under `tools/drool`. It is not on crates.io yet, so build it from a
+checkout of this repo (`cargo run -q -p drool -- run`, the setting used
+here) until `cargo install drool` becomes available. Copying
+`tools/flash.cmd` and its commented runner line still works if you would
+rather stay on picotool.
 
 ## Requirements
 
@@ -69,7 +74,7 @@ For button-free `cargo run`, copy `tools/flash.cmd` and the `runner` line of
   `thumbv8m.main-none-eabihf` targets automatically via
   `rust-toolchain.toml`)
 - `flip-link`: `cargo install flip-link`
-- `picotool` v2.x in PATH
+- `picotool` v2.x in PATH — optional, only for the `flash.cmd` fallback
 
 ## Running the bundled demo
 
@@ -82,17 +87,30 @@ First flash (BOOTSEL button required once): enter BOOTSEL mode by holding
 BOOT while pressing RESET, then:
 
 ```sh
-cargo run --release --example demo_rp2040 --features rp2040
+cargo rp2040
 ```
 
-Every flash after that: same command, no buttons. The cargo runner
-(`flash.cmd`) sends `picotool reboot -f -u` to the running firmware, waits
-for BOOTSEL enumeration, and loads the new binary.
+Every flash after that: same command, no buttons.
 
-> **Windows note**: picotool rejects single-shot forced commands
-> (`picotool load -f`) for RP2040 on Windows, so the default runner uses
-> the supported two-step flow (`reboot -f -u`, then `load`). This applies
-> to RP2040 only; see the RP2350 section below.
+### How flashing works now
+
+The cargo runner is `drool`, the Rust flasher in `tools/drool`
+(`cargo run -q -p drool -- run`). One invocation does the whole cycle: it
+finds the running device by its reset interface (class `FF/00/01`, any
+VID/PID), reboots it into BOOTSEL, waits for the ROM, erases and writes
+over PICOBOOT, reads the first 256 bytes back to verify, and reboots into
+the application. A device already sitting in BOOTSEL skips the reset step.
+Verified end to end on a Seeed XIAO RP2040 (`2e8a:000a`) and a Waveshare
+RP2350-GEEK (`2e8a:0009`), from both entry states.
+
+`drool` also has `reboot [--app]` (reset only, no flashing) and
+`flash <ELF> [--no-run]` for flashing without the final restart.
+
+`tools/flash.cmd` remains as a picotool fallback: it exists because
+picotool refuses single-shot forced commands (`picotool load -f`) for
+RP2040 on Windows and needs the two-step `reboot -f -u`, then `load`
+instead. That restriction was picotool policy, not a platform limit —
+`drool` flashes RP2040 on Windows in one command.
 
 ### RP2350
 
@@ -101,25 +119,20 @@ verified on a Waveshare RP2350-GEEK (RP2350A, W25Q128JV 16 MB flash, no
 user LED; USB and reflash behavior verified). Build and flash it with:
 
 ```sh
-cargo run --release --example demo_rp2350 \
-    --features rp2350 \
-    --target thumbv8m.main-none-eabihf
+cargo rp2350
 ```
 
 It enumerates as VID:PID `2e8a:0009` ("Pico 2") with the same CDC serial
 + reset interface pair, and Windows binds WinUSB automatically through the
 same MS OS 2.0 descriptors.
 
-On RP2350 the Windows restriction above does not apply: single-shot
-`picotool load -f -x -t elf` reboots the running firmware into BOOTSEL,
-flashes, and restarts the application in one command. `flash.cmd` remains
-the default runner for both chips and works on RP2350 as well.
+Flashing works exactly as described above — `drool` is the runner for both
+chips, and the one-command flow is the same on RP2350 as on RP2040.
 
-> **Linux/macOS note**: `tools/flash.cmd` is a Windows batch file — switch
-> the `runner` line in `.cargo/config.toml` to the single-shot
-> `picotool load -f -x -t elf` (a commented line there has it ready).
-> On Linux, add picotool's udev rules (or run as root) so the vendor
-> interface is accessible. Not yet verified on hardware by this project.
+> **Linux/macOS note**: `drool` is pure Rust with no batch file involved,
+> so it is expected to work on both, but this project has verified it only
+> on Windows. On Linux, udev rules are needed for both the reset interface
+> of the running device and the BOOTSEL device (or run as root).
 
 Poll requirement: `usb_dev.poll(...)` must run at least every 10 ms while
 connected, so keep the main loop tight or poll from a USB interrupt.
@@ -143,6 +156,11 @@ firmware calls the boot ROM's `reset_to_usb_boot()` and re-enumerates as a
 BOOTSEL device (`src/picotool_reset.rs`). On RP2350 the firmware calls the
 boot ROM's reboot API instead, and the request's GPIO activity pin is
 accepted and ignored — that API has no such parameter.
+
+On the host side, `drool` sends that same class request over `nusb` — it
+locates the interface by its class triple, so any VID/PID works — and then
+speaks PICOBOOT to the boot ROM to erase, write and verify, using the same
+protocol picotool does.
 
 For Windows to bind WinUSB to the vendor interface automatically, the device
 provides Microsoft OS 2.0 descriptors (`src/ms_os_20.rs`): a BOS platform
@@ -175,8 +193,10 @@ device with a serial-number-based instance ID, a COM port, and an error-free
 ├── examples/
 │   ├── demo_rp2040.rs        # RP2040: CDC serial + reset interface + LED
 │   └── demo_rp2350.rs        # RP2350: CDC serial + reset interface
-├── tools/flash.cmd           # button-free flash script (reboot -f -u, then load)
-├── .cargo/config.toml        # picotool runner + per-chip build config
+├── tools/
+│   ├── drool/                # bundled Rust flasher (nusb reset + PICOBOOT)
+│   └── flash.cmd             # picotool fallback (reboot -f -u, then load)
+├── .cargo/config.toml        # drool runner + per-chip build config
 ├── docs/                     # Japanese README, CONTRIBUTING, ROADMAP, ADRs,
 │                             #   CHANGELOG, and the investigation record
 ├── variants/                 # earlier experiment binaries (not built)

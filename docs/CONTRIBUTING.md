@@ -7,12 +7,12 @@ and an RP2040 or RP2350 board.
 
 ```console
 $ cargo install flip-link
-$ cargo run --release --example demo_rp2040 --features rp2040   # flashes the demo (see README for the first-flash step)
+$ cargo rp2040   # flashes the demo (see README for the first-flash step)
 ```
 
 `rust-toolchain.toml` makes rustup install the `thumbv6m-none-eabi`
 and `thumbv8m.main-none-eabihf` targets automatically. For RP2350, run
-the `demo_rp2350` example instead (see the README for the flags).
+`cargo rp2350` instead.
 
 ## Architecture
 
@@ -21,6 +21,8 @@ the `demo_rp2350` example instead (see the README for the flags).
 ```
 consumer firmware ──▶ picotool_reset (UsbClass) ──▶ ms_os_20 (descriptor data)
                                    └──▶ rp2040_hal::rom_data (BOOTSEL reboot)
+
+drool (tools/drool) ──▶ nusb (reset) / picoboot (BOOTSEL flashing)
 ```
 
 - **ms_os_20**: dependency-free descriptor byte arrays (BOS platform
@@ -37,16 +39,34 @@ Design decisions are recorded in [adr/](adr/).
 ```console
 $ cargo test --lib --target x86_64-pc-windows-msvc    # host (Windows)
 $ cargo test --lib --target x86_64-unknown-linux-gnu  # host (Linux)
+$ cargo test -p drool                                 # host tool (8 tests)
 ```
 
-The explicit `--target` is required because `.cargo/config.toml` sets the
-default build target to `thumbv6m-none-eabi`.
+Naming the host target explicitly keeps these tests host-only even if a
+default build target is ever added back to `.cargo/config.toml`.
 
 Descriptor changes must keep the structural tests green; they replicate
 the Windows MS OS 2.0 validator rules (lengths, offsets, containment).
-On-target verification: flash the demo and confirm Windows enumerates the
-device error-free (serial-number instance ID, COM port, "Reset" interface
-bound to WinUSB) and `picotool reboot -f -u` works.
+
+The `drool` tests cover the pure ELF-to-write-plan module — pages
+synthesized by rounding segment starts down to 256-byte boundaries, gaps
+filled with `0xFF`, consecutive pages coalesced, overlapping segments
+rejected — plus one regression test pinning drool's need for a tokio
+runtime context.
+
+### Hardware test manifest
+
+Everything below needs a physical RP2040 or RP2350 board on the bench,
+which is what keeps these cases out of CI. On-target descriptor
+verification also belongs here: flash the demo and confirm Windows
+enumerates the device error-free (serial-number instance ID, COM port,
+"Reset" interface bound to WinUSB).
+
+| Case | Command | Expected |
+| ---- | ------- | -------- |
+| Running device, full cycle | `cargo rp2040` / `cargo rp2350` | Reset, BOOTSEL, write, verify, ending in "Rebooting into the application"; the device re-enumerates as the demo |
+| Device already in BOOTSEL | `drool run <ELF>` | Reset step skipped, flashes and restarts |
+| Reset only | `drool reboot --app` | Device re-enumerates without being reflashed |
 
 ## Bilingual documentation
 

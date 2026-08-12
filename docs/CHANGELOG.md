@@ -9,6 +9,27 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+### Changed
+
+- The repository no longer sets a default build target. Host tools build
+  natively, and firmware builds carry an explicit `--target` through the
+  `cargo rp2040` / `cargo rp2350` aliases.
+
+### Added
+
+- `drool`, a workspace member under `tools/drool`: an all-Rust flasher
+  that reboots the running firmware through the reset interface, writes
+  the new binary over PICOBOOT, verifies it, and restarts the
+  application — one command, both chips, every platform. It lifts
+  picotool's refusal of single-shot forced commands for RP2040 on
+  Windows. Built on `nusb` (discovery and the reset control transfer),
+  `picoboot`, and `tokio` with only the `rt` feature. Subcommands:
+  `reboot [--app]`, `flash <ELF> [--no-run]`, `run <ELF>`.
+- `cargo rp2040` / `cargo rp2350` aliases that build the demo for their
+  chip and flash it.
+- The default cargo runner now goes through `drool`; `tools/flash.cmd`
+  stays as a picotool fallback, available as a commented runner line.
+
 ## [0.2.0] — 2026-08-12
 
 ### Breaking
