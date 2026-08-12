@@ -7,12 +7,13 @@
 
 # RP2040 (thumbv6m-none-eabi)
 [target.'cfg(all(target_arch = "arm", target_os = "none", target_abi = "eabi"))']
-# Button-free flash. First flash still needs the BOOTSEL button.
-# Windows: two-step reboot+load script (picotool rejects single-shot
-# forced commands for RP2040 on Windows).
-runner = "./tools/flash.cmd"
-# Linux/macOS: single-shot forced load works; use this runner instead:
-# runner = "picotool load -f -x -t elf"
+# Button-free flash via the bundled drool tool (tools/drool): reboots
+# running firmware through the reset interface, flashes over PICOBOOT,
+# and restarts the app — one command, all platforms, no picotool.
+# First flash still needs the BOOTSEL button.
+runner = "cargo run -q -p drool -- run"
+# picotool fallback (Windows batch, two-step reboot+load):
+# runner = "./tools/flash.cmd"
 rustflags = [
   "-C", "linker=flip-link",
   "-C", "link-arg=-Tlink.x",
@@ -26,7 +27,7 @@ rustflags = [
 
 # RP2350 ARM (thumbv8m.main-none-eabihf)
 [target.'cfg(all(target_arch = "arm", target_os = "none", target_abi = "eabihf"))']
-runner = "./tools/flash.cmd"
+runner = "cargo run -q -p drool -- run"
 rustflags = [
   "-C", "linker=flip-link",
   "-C", "link-arg=-Tlink.x",
@@ -35,5 +36,9 @@ rustflags = [
   "-C", "link-arg=memory/rp2350",
 ]
 
-[build]
-target = "thumbv6m-none-eabi"
+# Firmware builds name their target explicitly: the host tool under
+# tools/drool shares this config tree, and a [build] target here would
+# apply to it too.
+[alias]
+rp2040 = "run --release --example demo_rp2040 --features rp2040 --target thumbv6m-none-eabi"
+rp2350 = "run --release --example demo_rp2350 --features rp2350 --target thumbv8m.main-none-eabihf"

@@ -1,3 +1,6 @@
+[workspace]
+members = ["tools/drool"]
+
 [package]
 name = "drooling"
 version = "0.2.0"

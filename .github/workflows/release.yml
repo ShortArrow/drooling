@@ -50,7 +50,7 @@ jobs:
           targets: thumbv6m-none-eabi,thumbv8m.main-none-eabihf
       - name: Install flip-link
         run: cargo install flip-link
-      - run: cargo build --release --locked --example demo_rp2040 --features rp2040
+      - run: cargo build --release --locked --example demo_rp2040 --features rp2040 --target thumbv6m-none-eabi
       - run: cargo build --release --locked --example demo_rp2350 --features rp2350 --target thumbv8m.main-none-eabihf
       - run: cargo test --lib --locked --features rp2040 --target ${{ matrix.host-target }}
       - run: cargo test --lib --locked --features rp2350 --target ${{ matrix.host-target }}
@@ -77,7 +77,7 @@ jobs:
       - name: Install flip-link and elf2uf2-rs
         run: cargo install flip-link elf2uf2-rs
       - name: Build demo (RP2040, thumbv6m)
-        run: cargo build --release --locked --example demo_rp2040 --features rp2040
+        run: cargo build --release --locked --example demo_rp2040 --features rp2040 --target thumbv6m-none-eabi
       - name: Build demo (RP2350, thumbv8m)
         run: cargo build --release --locked --example demo_rp2350 --features rp2350 --target thumbv8m.main-none-eabihf
       # elf2uf2-rs converts RP2040 binaries only; the RP2350 demo ships as
@@ -151,8 +151,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
-      # The repo's .cargo/config.toml defaults the build target to
-      # thumbv6m-none-eabi, so `cargo publish`'s verify build needs it.
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: thumbv6m-none-eabi,thumbv8m.main-none-eabihf
@@ -175,11 +173,7 @@ jobs:
           if [ "$status" = "200" ]; then
             echo "drooling $version already on crates.io — skipping dry-run"
           else
-            # --target: the verify build otherwise inherits the repo's
-            # default thumbv6m target and hits the chip-less compile_error;
-            # the packaged crate ships no .cargo config, so a host build is
-            # what consumers' tooling verifies too.
-            cargo publish --dry-run --target x86_64-unknown-linux-gnu
+            cargo publish --dry-run
           fi
 
       - name: Publish drooling
@@ -193,5 +187,5 @@ jobs:
           if [ "$status" = "200" ]; then
             echo "drooling $version already on crates.io — skipping publish"
           else
-            cargo publish --target x86_64-unknown-linux-gnu
+            cargo publish
           fi

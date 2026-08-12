@@ -31,11 +31,10 @@ jobs:
       - name: Install flip-link
         run: cargo install flip-link
       - name: Build library and demo (RP2040, thumbv6m)
-        run: cargo build --release --example demo_rp2040 --features rp2040
+        run: cargo build --release --example demo_rp2040 --features rp2040 --target thumbv6m-none-eabi
       - name: Build library and demo (RP2350, thumbv8m)
         run: cargo build --release --example demo_rp2350 --features rp2350 --target thumbv8m.main-none-eabihf
-      # Host tests need an explicit target: .cargo/config.toml defaults the
-      # build target to thumbv6m-none-eabi.
+      # Explicit host target keeps these host-only even if a default build target returns.
       - name: Host tests (descriptor structure, rp2040)
         run: cargo test --lib --features rp2040 --target ${{ matrix.host-target }}
       - name: Host tests (descriptor structure, rp2350)
@@ -43,6 +42,23 @@ jobs:
       # No chip feature: what `cargo publish`'s verify build compiles.
       - name: Host tests (descriptor structure, no chip feature)
         run: cargo test --lib --target ${{ matrix.host-target }}
+
+  drool:
+    name: drool host tool (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+      # Host tool: builds natively, no embedded targets needed.
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build drool
+        run: cargo build -p drool
+      - name: Test drool
+        run: cargo test -p drool
 
   docs-tandem:
     name: Bilingual docs updated together

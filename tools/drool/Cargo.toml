@@ -1,0 +1,22 @@
+[package]
+name = "drool"
+version = "0.1.0"
+edition = "2021"
+description = "Button-free flasher for RP2040/RP2350: reboots running firmware via the Pico reset interface and flashes ELFs over PICOBOOT"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ShortArrow/drooling"
+
+[dependencies]
+nusb = "0.2"
+picoboot = "0.2"
+clap = { version = "4", features = ["derive"] }
+# Only ELF program headers are read; read_core + elf is the smallest
+# object feature set that provides them.
+object = { version = "0.36", default-features = false, features = ["read_core", "elf", "std"] }
+anyhow = "1"
+# nusb's default features select its `tokio` backend, so its `MaybeFuture`
+# awaits resolve through `tokio::task::spawn_blocking`. That call panics
+# unless it runs inside a Tokio runtime context, hence the dependency here.
+# Only `rt` is needed: `spawn_blocking` uses the blocking pool, not the I/O
+# or time drivers.
+tokio = { version = "1", features = ["rt"] }
