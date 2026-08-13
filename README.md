@@ -2,6 +2,8 @@
 
 [English](README.md) | [日本語](docs/README.jp.md)
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ShortArrow/drooling)
+
 Button-free flashing for Rust firmware on RP2040, using picotool's vendor
 reset interface — pure Rust, Pico SDK compatible, works on Windows.
 

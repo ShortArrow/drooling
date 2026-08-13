@@ -2,6 +2,8 @@
 
 [English](../README.md) | [日本語](README.jp.md)
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ShortArrow/drooling)
+
 RP2040 の Rust ファームウェアを、picotool の vendor reset interface 経由で
 ボタン操作なしに書き込むためのクレート。純 Rust・Pico SDK 互換・Windows 対応。
 
