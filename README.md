@@ -27,8 +27,8 @@ drooling = { version = "0.2", features = ["rp2040"] }
 drooling = { version = "0.2", features = ["rp2350"] }
 ```
 
-The chip features are mutually exclusive and there is no default, so
-exactly one of them must be chosen.
+The chip features are mutually exclusive and there is no default:
+choose exactly one.
 
 ```rust
 use drooling::PicotoolReset;
@@ -83,7 +83,7 @@ Picotool alternatives and platform notes live in
   `thumbv8m.main-none-eabihf` targets automatically via
   `rust-toolchain.toml`)
 - `flip-link`: `cargo install flip-link`
-- `picotool` v2.x in PATH — optional, only for the `flash.cmd` fallback
+- `picotool` v2.x — optional; only the `flash.cmd` fallback needs it in PATH
 
 ## Running the bundled demo
 

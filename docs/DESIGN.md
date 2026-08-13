@@ -14,11 +14,11 @@ The demo enumerates as a composite USB device (VID:PID `2e8a:000a`):
 | 0, 1 | CDC ACM | USB serial port |
 | 2 | Vendor (`FF/00/01`) | Pico SDK compatible reset interface |
 
-Both `picotool` and `drool` reboot the board by sending a reset request to
-the vendor interface, which the firmware answers by handing control to the
-boot ROM (`src/picotool_reset.rs`): the device drops off the bus and comes
-back as a BOOTSEL device, and the host then talks to the ROM to erase,
-write and verify. The firmware uses the RP2040 and RP2350 ROM entry points
+Both `picotool` and `drool` send a reset request to the vendor
+interface. The firmware hands control to the boot ROM
+(`src/picotool_reset.rs`); the device drops off the bus, comes back as a
+BOOTSEL device, and from then on the host's counterpart is the ROM,
+which handles erase, write and verify. The firmware uses the RP2040 and RP2350 ROM entry points
 respectively, so one interface covers both chips.
 
 The device also carries Microsoft OS 2.0 descriptors (`src/ms_os_20.rs`),

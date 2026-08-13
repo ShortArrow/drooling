@@ -8,7 +8,7 @@ while pressing RESET); every flash after that needs no buttons.
 ## The drool flow
 
 `drool` is the Rust flasher developed in this repository (`tools/drool`).
-Where it comes from depends on where you are:
+The setup depends on where you run it:
 
 - **Inside a checkout of this repository** nothing needs installing: the
   configured runner, `cargo run -q -p drool -- run`, builds and runs the
@@ -64,7 +64,7 @@ exit /b 1
 The batch file exists because picotool refuses single-shot forced
 commands (`picotool load -f`) for RP2040 on Windows and wants
 `picotool reboot -f -u` followed by `picotool load` instead; the script
-runs both and retries the load while the ROM enumerates. That
+runs the two in order and retries the load while the ROM enumerates. That
 restriction is picotool policy rather than a platform limit, which is
 why `drool` flashes RP2040 on Windows in one command.
 

@@ -31,7 +31,7 @@ does not get the reset interface for free and must integrate it itself.
 ## What drooling is
 
 `drooling` is that same functionality for the Rust `usb-device`
-ecosystem, where no working equivalent existed. On the wire it is
+ecosystem, which had no working equivalent. On the wire it is
 identical to the SDK implementation — the same class requests, the same
 descriptors, the same device interface GUID — so host tools cannot tell
 a drooling firmware from an SDK one.

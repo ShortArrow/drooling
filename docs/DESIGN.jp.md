@@ -14,10 +14,11 @@ C の世界で Pico SDK が提供しているものとの対応は
 | 0, 1 | CDC ACM | USB シリアルポート |
 | 2 | Vendor (`FF/00/01`) | Pico SDK 互換 reset interface |
 
-`picotool` も `drool` も、vendor interface へ reset 要求を送ることで
-ボードを再起動させる。ファームウェアはそれに応えて boot ROM へ制御を渡し
+`picotool` も `drool` も、vendor interface へ reset 要求を送る。
+ファームウェアはこの要求を受けて boot ROM へ制御を渡し
 (`src/picotool_reset.rs`)、デバイスは一度バスから消えて BOOTSEL デバイス
-として戻ってくる。以降ホストは ROM と会話して消去・書き込み・検証を行う。
+として戻ってくる。以降ホストの相手は ROM で、消去・書き込み・検証は
+そちらに対して行う。
 ファームウェアは RP2040 と RP2350 それぞれの ROM の入口を使うため、
 1つの interface で両チップをカバーできる。
 

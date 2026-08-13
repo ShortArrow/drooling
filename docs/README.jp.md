@@ -7,8 +7,8 @@ RP2040 の Rust ファームウェアを、picotool の vendor reset interface �
 
 `PicotoolReset` クラスを USB 複合デバイスに追加すると、
 `picotool reboot -f -u` で実行中ファームを BOOTSEL モードへ再起動できる
-(BOOTSEL ボタン不要)。同梱の BOS / Microsoft OS 2.0 ディスクリプタにより
-Windows は WinUSB を自動バインドする — Zadig や手動ドライバ導入は不要。
+(BOOTSEL ボタン不要)。BOS / Microsoft OS 2.0 ディスクリプタを同梱しているので、Windows では
+WinUSB が自動で当たる。Zadig も手動のドライバ導入も要らない。
 
 名前の由来: USB Type-C の口は、よだれを垂らしそうなスライムの口に見える。
 その口から漏れ出てくるのは操作 — ボタンを押さなくても再起動・書き込みが
@@ -79,8 +79,8 @@ picotool を使う場合の選択肢とプラットフォーム別の注意は
 - Rust toolchain(`thumbv6m-none-eabi` と `thumbv8m.main-none-eabihf`
   ターゲットは `rust-toolchain.toml` により rustup が自動導入)
 - `flip-link`: `cargo install flip-link`
-- `picotool` v2.x(PATH が通っていること)— 任意、`flash.cmd`
-  フォールバック用
+- `picotool` v2.x — 無くてもよい。`flash.cmd` フォールバックを使う
+  ときだけ PATH に通す
 
 ## 同梱デモの実行
 
@@ -151,7 +151,7 @@ WinUSB を自動バインドする。
 
 ## ライセンス
 
-以下のいずれかのライセンスを選択できる:
+ライセンスは次の2つから選べる。
 
 - Apache License, Version 2.0 ([LICENSE-APACHE](../LICENSE-APACHE))
 - MIT license ([LICENSE-MIT](../LICENSE-MIT))

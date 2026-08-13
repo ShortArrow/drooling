@@ -91,15 +91,15 @@ vendor request コードを告知する。Windows はその vendor request を
 `wIndex` 7 で送ってセットを取得する。
 
 ディスクリプタセットは `WINUSB` compatible ID と picotool の device
-interface GUID `{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}` を含む。この2つが
-揃うことで、Windows は Zadig も手動ドライバ導入もなしに vendor interface へ
-WinUSB をバインドする。デバイス側の実装は `src/ms_os_20.rs`、取得要求への
+interface GUID `{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}` を含む。この2つが揃うと、
+Windows は Zadig も手動のドライバ導入もなしに vendor interface へ WinUSB
+を当てる。デバイス側の実装は `src/ms_os_20.rs`、取得要求への
 応答は `src/picotool_reset.rs`。
 
 ## BOOTSEL フェーズ
 
-reset 要求のあとファームウェアはもういない: boot ROM が自前の USB デバイス
-として列挙され、PICOBOOT を話す。`drool`(`picoboot` クレート経由)も
+reset 要求のあと、ファームウェアはもう動いていない。boot ROM が自前の
+USB デバイスとして列挙され、PICOBOOT 要求を受け付ける。`drool`(`picoboot` クレート経由)も
 picotool も同じ interface を駆動し、操作もどちらも同じ:
 
 - 4096 バイトのセクタ単位で消去し、

@@ -93,9 +93,8 @@ retrieves it; Windows then fetches the set with that vendor request, using
 `wIndex` 7.
 
 The descriptor set carries the `WINUSB` compatible ID and picotool's device
-interface GUID `{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}`. Those two together
-are what makes Windows bind WinUSB to the vendor interface with no Zadig
-and no manual driver install. The device side is `src/ms_os_20.rs`, and
+interface GUID `{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}`. Together they let Windows bind WinUSB to the vendor interface without
+Zadig or a manual driver install. The device side is `src/ms_os_20.rs`, and
 `src/picotool_reset.rs` answers the fetch.
 
 ## BOOTSEL phase

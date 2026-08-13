@@ -30,8 +30,8 @@ Microsoft OS 2.0 ディスクリプタ — を組み込む。利用者は USB �
 
 ## drooling は何か
 
-`drooling` は同じ機能の Rust `usb-device` エコシステム版で、動作する
-対応物が存在しなかった穴を埋めるもの。ワイヤ上は SDK 実装と完全に同一 —
+`drooling` は同じ機能の Rust `usb-device` エコシステム版。動作する
+対応物が無かったので、このクレートで用意した。ワイヤ上は SDK 実装と完全に同一 —
 同じ class request、同じディスクリプタ、同じ device interface GUID —
 なので、ホストツールから drooling 製ファームと SDK 製ファームは
 区別できない。

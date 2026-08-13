@@ -8,7 +8,7 @@ RESET を押す)。2回目以降はボタン不要。
 ## drool のフロー
 
 `drool` は本リポジトリで開発している Rust 製書き込みツール
-(`tools/drool`)。入手方法は読んでいる場所によって違う:
+(`tools/drool`)。どこで使うかで手順が変わる。
 
 - **本リポジトリのチェックアウト内**ならインストール不要: 設定済みの
   runner `cargo run -q -p drool -- run` が同梱コピーをその場でビルドして
@@ -24,8 +24,8 @@ RESET を押す)。2回目以降はボタン不要。
 
 ## picotool で書き込む場合
 
-ここまでの内容は picotool v2.x でもそのまま成立する — ファームウェアは
-Pico SDK のプロトコルを話すため、picotool から普通に駆動できる。
+ファームウェアが実装しているのは Pico SDK と同じプロトコルなので、
+picotool v2.x でもそのまま書き込める。
 `.cargo/config.toml` の `runner` を `drool run` の代わりに次のいずれかに
 向ければよい:
 
@@ -63,7 +63,7 @@ exit /b 1
 
 このバッチが存在するのは、picotool が RP2040 + Windows でワンショットの
 forced command(`picotool load -f`)を拒否し、`picotool reboot -f -u` →
-`picotool load` の2段階を要求するため。スクリプトは両者を実行し、ROM が
+`picotool load` の2段階を要求するため。スクリプトはこの2つを順に実行し、ROM が
 列挙されるまで load をリトライする。これはプラットフォームの制約ではなく
 picotool の方針であり、`drool` は Windows の RP2040 でも1コマンドで
 書き込む。
