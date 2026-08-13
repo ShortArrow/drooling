@@ -3,7 +3,7 @@ members = ["tools/drool"]
 
 [package]
 name = "drooling"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "Pico SDK compatible picotool reset interface (vendor class + BOS / MS OS 2.0 descriptors) for RP2040 Rust firmware"
 license = "MIT OR Apache-2.0"

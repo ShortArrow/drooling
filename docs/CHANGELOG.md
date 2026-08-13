@@ -9,6 +9,8 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-08-13
+
 ### Changed
 
 - The repository no longer sets a default build target. Host tools build
