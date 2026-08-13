@@ -189,3 +189,20 @@ jobs:
           else
             cargo publish
           fi
+
+      - name: Publish drool
+        # drool versions independently of the tag: this fires only when
+        # tools/drool/Cargo.toml carries a version crates.io does not
+        # have yet, so tags that ship no drool change skip it.
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          set -euo pipefail
+          version=$(grep -m1 '^version = ' tools/drool/Cargo.toml | cut -d'"' -f2)
+          status=$(curl -fsS -A "drooling-release-workflow" -o /dev/null -w '%{http_code}' \
+            "https://crates.io/api/v1/crates/drool/$version" || echo "000")
+          if [ "$status" = "200" ]; then
+            echo "drool $version already on crates.io - skipping publish"
+          else
+            cargo publish -p drool
+          fi

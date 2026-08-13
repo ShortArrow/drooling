@@ -25,11 +25,9 @@ Windows のみ。
 - reset interface の `embassy-usb` 版を検討する(embassy は `msos`
   モジュールで MS OS 2.0 を第一級サポート)
 
-## drool の公開
+## drool の配布
 
-- `drool`(0.1.0 から crates.io 公開済み)を Trusted Publishing と
-  リリースワークフローに組み込む(ビルド済み
-  バイナリの配布はその後でよい)
+- ビルド済み `drool` バイナリをリリース成果物として配る
 
 ## リポジトリ整理
 

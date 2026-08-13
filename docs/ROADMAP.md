@@ -25,11 +25,9 @@ verified end to end.
 - Consider an `embassy-usb` variant of the reset interface (embassy has
   first-class MS OS 2.0 support in its `msos` module)
 
-## Publish drool
+## drool distribution
 
-- Wire `drool` (on crates.io since 0.1.0) into Trusted Publishing and
-  the release workflow; prebuilt binaries can
-  follow
+- Prebuilt `drool` binaries as release assets
 
 ## Repository hygiene
 

@@ -84,5 +84,9 @@ and indexed in `adr/README.md`.
    notes, and publishes to crates.io via OIDC trusted publishing. Put
    `[skip publish]` in the tagged commit message to skip crates.io.
 
+To release `drool`, bump the version in `tools/drool/Cargo.toml` before
+tagging: the same workflow publishes it whenever that version is not on
+crates.io yet.
+
 `CHANGELOG.md` is English-only by convention and therefore exempt from
 the bilingual tandem check.

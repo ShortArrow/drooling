@@ -9,6 +9,12 @@ under `### Breaking`.
 
 ## [Unreleased]
 
+### Added
+
+- The release workflow publishes `drool` alongside `drooling` via
+  Trusted Publishing whenever `tools/drool/Cargo.toml` carries a
+  version crates.io does not have yet.
+
 ## [0.2.1] — 2026-08-13
 
 ### Changed
