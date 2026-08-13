@@ -84,6 +84,16 @@ picotool を使う場合の選択肢とプラットフォーム別の注意は
 
 ## 同梱デモの実行
 
+デモは crates.io のパッケージには含まれておらず、このリポジトリの中に
+ある。後述の `cargo rp2040` / `cargo rp2350` はリポジトリの
+`.cargo/config.toml` に定義された cargo エイリアスで、**チェックアウトの
+中でしか動かない**。まずは:
+
+```sh
+git clone https://github.com/ShortArrow/drooling
+cd drooling
+```
+
 `examples/demo_rp2040.rs` は完全な複合デバイス(CDC シリアル + reset interface +
 LED 点滅)。Seeed XIAO RP2040(LED は GPIO25、アクティブ Low)と
 Waveshare RP2040-ETH(ユーザー LED なし、USB と再書き込み動作を検証)で
