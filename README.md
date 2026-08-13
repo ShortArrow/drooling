@@ -114,11 +114,33 @@ RP2350-GEEK (`2e8a:0009`), from both entry states.
 `drool` also has `reboot [--app]` (reset only, no flashing) and
 `flash <ELF> [--no-run]` for flashing without the final restart.
 
-`tools/flash.cmd` remains as a picotool fallback: it exists because
-picotool refuses single-shot forced commands (`picotool load -f`) for
-RP2040 on Windows and needs the two-step `reboot -f -u`, then `load`
-instead. That restriction was picotool policy, not a platform limit —
-`drool` flashes RP2040 on Windows in one command.
+#### Flashing with picotool instead
+
+Everything here works with picotool v2.x as well — the firmware speaks
+the Pico SDK protocol, so any picotool release can drive it. Point the
+`runner` in `.cargo/config.toml` at one of these instead of `drool run`:
+
+```toml
+# Linux / macOS, and Windows with RP2350: one command
+runner = "picotool load -f -x -t elf"
+
+# Windows with RP2040: two steps, wrapped in the bundled batch file
+runner = "./tools/flash.cmd"
+```
+
+The batch file exists because picotool refuses single-shot forced
+commands (`picotool load -f`) for RP2040 on Windows and wants
+`picotool reboot -f -u` followed by `picotool load` instead; the script
+runs both and retries the load while the ROM enumerates. That
+restriction is picotool policy rather than a platform limit, which is
+why `drool` flashes RP2040 on Windows in one command.
+
+Without a cargo runner at all, the same two steps by hand:
+
+```sh
+picotool reboot -f -u                    # running firmware -> BOOTSEL
+picotool load -x -t elf <path-to-elf>    # flash and run
+```
 
 ### RP2350
 

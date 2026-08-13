@@ -111,11 +111,34 @@ BOOTSEL へ再起動し、ROM の起動を待ち、PICOBOOT で消去・書き�
 `drool` には `reboot [--app]`(書き込みなしの再起動のみ)と
 `flash <ELF> [--no-run]`(最後の再起動を行わない書き込み)もある。
 
-`tools/flash.cmd` は picotool フォールバックとして残っている。picotool が
-RP2040 + Windows でワンショットの forced command(`picotool load -f`)を
-拒否し、2段階の `reboot -f -u` → `load` を要求するために存在するもの。
-この制限はプラットフォームの制約ではなく picotool の方針であり、`drool`
-は Windows の RP2040 でも1コマンドで書き込む。
+#### picotool で書き込む場合
+
+ここまでの内容は picotool v2.x でもそのまま成立する — ファームウェアは
+Pico SDK のプロトコルを話すため、picotool から普通に駆動できる。
+`.cargo/config.toml` の `runner` を `drool run` の代わりに次のいずれかに
+向ければよい:
+
+```toml
+# Linux / macOS、および Windows + RP2350: 1コマンド
+runner = "picotool load -f -x -t elf"
+
+# Windows + RP2040: 2段階を同梱バッチにまとめたもの
+runner = "./tools/flash.cmd"
+```
+
+このバッチが存在するのは、picotool が RP2040 + Windows でワンショットの
+forced command(`picotool load -f`)を拒否し、`picotool reboot -f -u` →
+`picotool load` の2段階を要求するため。スクリプトは両者を実行し、ROM が
+列挙されるまで load をリトライする。これはプラットフォームの制約ではなく
+picotool の方針であり、`drool` は Windows の RP2040 でも1コマンドで
+書き込む。
+
+cargo runner を使わず手で叩く場合も同じ2段階:
+
+```sh
+picotool reboot -f -u                    # 実行中ファーム -> BOOTSEL
+picotool load -x -t elf <ELF のパス>     # 書き込んで実行
+```
 
 ### RP2350
 
