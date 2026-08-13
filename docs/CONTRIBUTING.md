@@ -60,7 +60,8 @@ Everything below needs a physical RP2040 or RP2350 board on the bench,
 which is what keeps these cases out of CI. On-target descriptor
 verification also belongs here: flash the demo and confirm Windows
 enumerates the device error-free (serial-number instance ID, COM port,
-"Reset" interface bound to WinUSB).
+"Reset" interface bound to WinUSB), and that `picotool reboot -f -u`
+works.
 
 | Case | Command | Expected |
 | ---- | ------- | -------- |

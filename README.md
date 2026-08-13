@@ -72,16 +72,10 @@ cargo install drool
 runner = "drool run"
 ```
 
-(This repository runs its bundled copy as `cargo run -q -p drool -- run`
-instead.)
+This repository runs its bundled copy as `cargo run -q -p drool -- run`.
 
-To stay on picotool instead: copy
-[`tools/flash.cmd`](https://github.com/ShortArrow/drooling/blob/main/tools/flash.cmd)
-out of this repository — the crates.io package does not include it —
-into your project at `tools/flash.cmd`, and set
-`runner = "./tools/flash.cmd"`. Platform-by-platform picotool runner
-lines, including the single-command variants that need no batch file,
-are in the picotool section further down.
+Picotool alternatives and platform notes live in
+[docs/FLASHING.md](docs/FLASHING.md).
 
 ## Requirements
 
@@ -107,73 +101,6 @@ cargo rp2040
 
 Every flash after that: same command, no buttons.
 
-### How flashing works now
-
-The cargo runner is `drool`, the Rust flasher in `tools/drool`
-(`cargo run -q -p drool -- run`). One invocation does the whole cycle: it
-finds the running device by its reset interface (class `FF/00/01`, any
-VID/PID), reboots it into BOOTSEL, waits for the ROM, erases and writes
-over PICOBOOT, reads the first 256 bytes back to verify, and reboots into
-the application. A device already sitting in BOOTSEL skips the reset step.
-Verified end to end on a Seeed XIAO RP2040 (`2e8a:000a`) and a Waveshare
-RP2350-GEEK (`2e8a:0009`), from both entry states.
-
-`drool` also has `reboot [--app]` (reset only, no flashing) and
-`flash <ELF> [--no-run]` for flashing without the final restart.
-
-#### Flashing with picotool instead
-
-Everything here works with picotool v2.x as well — the firmware speaks
-the Pico SDK protocol, so any picotool release can drive it. Point the
-`runner` in `.cargo/config.toml` at one of these instead of `drool run`:
-
-```toml
-# Linux / macOS, and Windows with RP2350: one command
-runner = "picotool load -f -x -t elf"
-
-# Windows with RP2040: two steps, wrapped in the bundled batch file
-runner = "./tools/flash.cmd"
-```
-
-The batch file is not part of the crates.io package; create it in your
-project as `tools/flash.cmd` with this content (identical to the copy in
-this repository):
-
-```bat
-@echo off
-rem Button-free flash for RP2040 on Windows.
-rem
-rem picotool on Windows rejects single-shot forced commands for RP2040
-rem ("picotool load -f"), so this script uses the supported two-step flow:
-rem reboot the running firmware into BOOTSEL via its vendor reset interface,
-rem then load. Works from both application mode and BOOTSEL mode.
-
-picotool reboot -f -u >nul 2>&1
-
-for /l %%i in (1,1,10) do (
-  picotool load -x -t elf %1 && exit /b 0
-  ping -n 2 127.0.0.1 >nul
-)
-echo picotool load failed after 10 attempts 1>&2
-exit /b 1
-```
-
-The batch file exists because picotool refuses single-shot forced
-commands (`picotool load -f`) for RP2040 on Windows and wants
-`picotool reboot -f -u` followed by `picotool load` instead; the script
-runs both and retries the load while the ROM enumerates. That
-restriction is picotool policy rather than a platform limit, which is
-why `drool` flashes RP2040 on Windows in one command.
-
-Without a cargo runner at all, the same two steps by hand:
-
-```sh
-picotool reboot -f -u                    # running firmware -> BOOTSEL
-picotool load -x -t elf <path-to-elf>    # flash and run
-```
-
-### RP2350
-
 `examples/demo_rp2350.rs` is the same composite device for RP2350,
 verified on a Waveshare RP2350-GEEK (RP2350A, W25Q128JV 16 MB flash, no
 user LED; USB and reflash behavior verified). Build and flash it with:
@@ -186,60 +113,10 @@ It enumerates as VID:PID `2e8a:0009` ("Pico 2") with the same CDC serial
 + reset interface pair, and Windows binds WinUSB automatically through the
 same MS OS 2.0 descriptors.
 
-Flashing works exactly as described above — `drool` is the runner for both
-chips, and the one-command flow is the same on RP2350 as on RP2040.
-
-> **Linux/macOS note**: `drool` is pure Rust with no batch file involved,
-> so it is expected to work on both, but this project has verified it only
-> on Windows. On Linux, udev rules are needed for both the reset interface
-> of the running device and the BOOTSEL device (or run as root).
-
-Poll requirement: `usb_dev.poll(...)` must run at least every 10 ms while
-connected, so keep the main loop tight or poll from a USB interrupt.
-
-VID/PID: the `0x2e8a:0x000a` pair in the example is Raspberry Pi's; fine
-for personal boards, but products should use their own VID — picotool
-finds the reset interface by its class triple (`FF/00/01`) on third-party
-VIDs too.
-
-## How it works
-
-The demo enumerates as a composite USB device (VID:PID `2e8a:000a`):
-
-| Interface | Class | Purpose |
-|-----------|-------|---------|
-| 0, 1 | CDC ACM | USB serial port |
-| 2 | Vendor (`FF/00/01`) | Pico SDK compatible reset interface |
-
-`picotool reboot -f -u` sends a class request to the vendor interface; the
-firmware calls the boot ROM's `reset_to_usb_boot()` and re-enumerates as a
-BOOTSEL device (`src/picotool_reset.rs`). On RP2350 the firmware calls the
-boot ROM's reboot API instead, and the request's GPIO activity pin is
-accepted and ignored — that API has no such parameter.
-
-On the host side, `drool` sends that same class request over `nusb` — it
-locates the interface by its class triple, so any VID/PID works — and then
-speaks PICOBOOT to the boot ROM to erase, write and verify, using the same
-protocol picotool does.
-
-For Windows to bind WinUSB to the vendor interface automatically, the device
-provides Microsoft OS 2.0 descriptors (`src/ms_os_20.rs`): a BOS platform
-capability descriptor plus a descriptor set carrying the `WINUSB` compatible
-ID and picotool's device interface GUID
-`{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}`.
-
-## Testing
-
-Host-side structural tests validate the hand-written descriptor byte arrays
-(lengths, offsets, containment — the dominant bug class for these):
-
-```sh
-cargo test --lib --target x86_64-pc-windows-msvc
-```
-
-On-target verification: flash the demo, then check that Windows shows the
-device with a serial-number-based instance ID, a COM port, and an error-free
-"Reset" interface bound to WinUSB, and that `picotool reboot -f -u` works.
+How the flashing actually works, the other `drool` subcommands, and the
+picotool alternative are in [docs/FLASHING.md](docs/FLASHING.md). The USB
+interface layout, the reset request and the descriptor design are in
+[docs/DESIGN.md](docs/DESIGN.md).
 
 ## File structure
 
@@ -257,8 +134,9 @@ device with a serial-number-based instance ID, a COM port, and an error-free
 │   ├── drool/                # bundled Rust flasher (nusb reset + PICOBOOT)
 │   └── flash.cmd             # picotool fallback (reboot -f -u, then load)
 ├── .cargo/config.toml        # drool runner + per-chip build config
-├── docs/                     # Japanese README, CONTRIBUTING, ROADMAP, ADRs,
-│                             #   CHANGELOG, and the investigation record
+├── docs/                     # Japanese README, FLASHING, DESIGN,
+│                             #   CONTRIBUTING, ROADMAP, ADRs, CHANGELOG,
+│                             #   and the investigation record
 ├── variants/                 # earlier experiment binaries (not built)
 └── memory/                   # per-chip linker memory layouts
 ```
