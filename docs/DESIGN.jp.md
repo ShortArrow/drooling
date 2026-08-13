@@ -11,22 +11,19 @@
 | 0, 1 | CDC ACM | USB シリアルポート |
 | 2 | Vendor (`FF/00/01`) | Pico SDK 互換 reset interface |
 
-`picotool reboot -f -u` は vendor interface へ class request を送り、
-ファームウェアが boot ROM の `reset_to_usb_boot()` を呼んで BOOTSEL
-デバイスとして再列挙する(`src/picotool_reset.rs`)。RP2350 では代わりに
-boot ROM の reboot API を呼び、要求に含まれる GPIO アクティビティピンは
-受け取った上で無視する — この API にはそのパラメータがない。
+`picotool` も `drool` も、vendor interface へ reset 要求を送ることで
+ボードを再起動させる。ファームウェアはそれに応えて boot ROM へ制御を渡し
+(`src/picotool_reset.rs`)、デバイスは一度バスから消えて BOOTSEL デバイス
+として戻ってくる。以降ホストは ROM と会話して消去・書き込み・検証を行う。
+ファームウェアは RP2040 と RP2350 それぞれの ROM の入口を使うため、
+1つの interface で両チップをカバーできる。
 
-ホスト側では `drool` が同じ class request を `nusb` 経由で送り
-(interface は class triple で探すため VID/PID は問わない)、その後
-boot ROM に対して PICOBOOT を話して消去・書き込み・検証を行う —
-picotool と同じプロトコル。
+デバイスは Microsoft OS 2.0 ディスクリプタも持つ(`src/ms_os_20.rs`)。
+その役割は、Zadig も手動ドライバ導入もなしに Windows が vendor interface へ
+WinUSB をバインドするようにすること、それだけ。
 
-Windows が vendor interface に WinUSB を自動バインドできるよう、
-Microsoft OS 2.0 ディスクリプタを提供する(`src/ms_os_20.rs`):
-BOS platform capability と、`WINUSB` compatible ID および picotool の
-device interface GUID `{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}` を含む
-ディスクリプタセット。
+リクエストコード・`wValue` のレイアウト・転送単位の手順は
+[PROTOCOL.jp.md](PROTOCOL.jp.md) にある。
 
 ## poll 要件
 
@@ -36,5 +33,6 @@ device interface GUID `{bc7398c1-73cd-4cb7-98b8-913a8fca7bf6}` を含む
 ## VID/PID
 
 例の `0x2e8a:0x000a` は Raspberry Pi のもの。個人のボードでは問題ないが、
-製品では自前の VID を使うこと — picotool はサードパーティ VID でも
-class triple(`FF/00/01`)で reset interface を発見する。
+製品では自前の VID を使うこと。それで壊れるものはない — picotool も
+`drool` も、サードパーティ VID でも class triple で reset interface を
+発見する。

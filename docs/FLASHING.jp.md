@@ -16,16 +16,17 @@ RESET を押す)。2回目以降はボタン不要。
 - **自分のプロジェクト**では `cargo install drool` で一度インストールし、
   `.cargo/config.toml` に `runner = "drool run"` を設定する。
 
-1回の実行で全工程を行う: reset
-interface(class `FF/00/01`、VID/PID は問わない)で実行中デバイスを探し、
-BOOTSEL へ再起動し、ROM の起動を待ち、PICOBOOT で消去・書き込みを行い、
-先頭 256 バイトを読み戻して検証し、アプリケーションへ再起動する。
+1回の実行で全工程を行う: 実行中デバイスを探し、BOOTSEL へ再起動し、ROM の
+起動を待ち、ファームウェアを書き込み、検証し、アプリケーションへ再起動する。
 既に BOOTSEL 状態のデバイスでは reset 手順を飛ばす。Seeed XIAO RP2040
 (`2e8a:000a`)と Waveshare RP2350-GEEK(`2e8a:0009`)で、どちらの開始
 状態からもエンドツーエンドで検証済み。
 
 `drool` には `reboot [--app]`(書き込みなしの再起動のみ)と
 `flash <ELF> [--no-run]`(最後の再起動を行わない書き込み)もある。
+
+各手順で USB 上を実際に流れるものは [PROTOCOL.jp.md](PROTOCOL.jp.md) に
+ある。
 
 ## picotool で書き込む場合
 

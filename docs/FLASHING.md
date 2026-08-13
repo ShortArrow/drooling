@@ -16,16 +16,18 @@ Where it comes from depends on where you are:
 - **In your own project** install it once with `cargo install drool`,
   then set `runner = "drool run"` in your `.cargo/config.toml`.
 
-One invocation does the whole cycle: it
-finds the running device by its reset interface (class `FF/00/01`, any
-VID/PID), reboots it into BOOTSEL, waits for the ROM, erases and writes
-over PICOBOOT, reads the first 256 bytes back to verify, and reboots into
-the application. A device already sitting in BOOTSEL skips the reset step.
-Verified end to end on a Seeed XIAO RP2040 (`2e8a:000a`) and a Waveshare
-RP2350-GEEK (`2e8a:0009`), from both entry states.
+One invocation does the whole cycle: it finds the running device, reboots
+it into BOOTSEL, waits for the ROM, writes the firmware, verifies it, and
+restarts the device into the application. A device already sitting in
+BOOTSEL skips the reset step. Verified end to end on a Seeed XIAO RP2040
+(`2e8a:000a`) and a Waveshare RP2350-GEEK (`2e8a:0009`), from both entry
+states.
 
 `drool` also has `reboot [--app]` (reset only, no flashing) and
 `flash <ELF> [--no-run]` for flashing without the final restart.
+
+What travels over USB in each of those steps is in
+[PROTOCOL.md](PROTOCOL.md).
 
 ## Flashing with picotool instead
 

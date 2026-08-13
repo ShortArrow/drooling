@@ -140,7 +140,7 @@ WinUSB を自動バインドする。
 │   ├── drool/                # 同梱の Rust 書き込みツール (nusb reset + PICOBOOT)
 │   └── flash.cmd             # picotool フォールバック (reboot -f -u → load)
 ├── .cargo/config.toml        # drool runner + チップ別ビルド設定
-├── docs/                     # 日本語 README, FLASHING, DESIGN,
+├── docs/                     # 日本語 README, FLASHING, DESIGN, PROTOCOL,
 │                             #   CONTRIBUTING, ROADMAP, ADR, CHANGELOG,
 │                             #   調査記録 (CONCLUSION.md)
 ├── variants/                 # 過去の実験バイナリ (ビルド対象外)

@@ -144,7 +144,7 @@ interface layout, the reset request and the descriptor design are in
 │   ├── drool/                # bundled Rust flasher (nusb reset + PICOBOOT)
 │   └── flash.cmd             # picotool fallback (reboot -f -u, then load)
 ├── .cargo/config.toml        # drool runner + per-chip build config
-├── docs/                     # Japanese README, FLASHING, DESIGN,
+├── docs/                     # Japanese README, FLASHING, DESIGN, PROTOCOL,
 │                             #   CONTRIBUTING, ROADMAP, ADRs, CHANGELOG,
 │                             #   and the investigation record
 ├── variants/                 # earlier experiment binaries (not built)
