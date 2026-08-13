@@ -6,6 +6,32 @@
 もの。振る舞いのレベルは [FLASHING.jp.md](FLASHING.jp.md)、デバイス側の
 構成は [DESIGN.jp.md](DESIGN.jp.md) にある。
 
+全体の流れ:
+
+```mermaid
+sequenceDiagram
+    participant H as ホスト (drool / picotool)
+    participant F as ファームウェア (reset interface)
+    participant R as Boot ROM (PICOBOOT)
+    H->>F: class request 0x01 (BOOTSEL へ再起動)
+    F-->>H: ACK
+    Note over F: 短い待機ののち boot ROM へ制御を渡す
+    F--xH: USB 切断
+    R-->>H: BOOTSEL デバイスとして列挙
+    H->>R: 排他アクセス / XIP 退出
+    loop 4096 バイトのセクタごと
+        H->>R: 消去
+    end
+    loop 256 バイトのページ列ごと
+        H->>R: 書き込み
+    end
+    H->>R: 最初に書いたページを読み戻し
+    R-->>H: ページ内容 (スポットチェック)
+    H->>R: アプリケーションへ再起動
+    R--xH: USB 切断
+    F-->>H: アプリケーションとして列挙
+```
+
 ## reset interface
 
 reset interface は class triple `FF/00/01`(vendor specific class、subclass
@@ -44,6 +70,19 @@ RP2350 の ROM API にそのパラメータがないため。
 `nusb` 経由で送る。
 
 ## Windows のドライババインド
+
+```mermaid
+sequenceDiagram
+    participant W as Windows (USB ハブドライバ)
+    participant D as デバイス
+    W->>D: GET_DESCRIPTOR (Device)
+    D-->>W: bcdUSB 0x0210
+    W->>D: GET_DESCRIPTOR (BOS)
+    D-->>W: MS OS 2.0 platform capability (セット長 + vendor code)
+    W->>D: vendor request, wIndex 7
+    D-->>W: 174 バイトのディスクリプタセット (WINUSB + device interface GUID)
+    Note over W: vendor interface に WinUSB をバインド
+```
 
 そもそも Windows に BOS ディスクリプタを要求させるのが `bcdUSB` の
 `0x0210`。BOS には MS OS 2.0 platform capability ディスクリプタが入って

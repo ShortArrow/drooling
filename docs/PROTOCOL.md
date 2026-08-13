@@ -7,6 +7,32 @@ BOOTSEL and reflashed. The behavior-level view is in
 [FLASHING.md](FLASHING.md), the device-side structure in
 [DESIGN.md](DESIGN.md).
 
+The whole cycle at a glance:
+
+```mermaid
+sequenceDiagram
+    participant H as Host (drool / picotool)
+    participant F as Firmware (reset interface)
+    participant R as Boot ROM (PICOBOOT)
+    H->>F: class request 0x01 (reboot to BOOTSEL)
+    F-->>H: ACK
+    Note over F: short delay, then hands control to the boot ROM
+    F--xH: USB disconnect
+    R-->>H: enumerates as the BOOTSEL device
+    H->>R: exclusive access / exit XIP
+    loop per 4096-byte sector
+        H->>R: erase
+    end
+    loop per 256-byte page run
+        H->>R: write
+    end
+    H->>R: read back the first written page
+    R-->>H: page contents (spot check)
+    H->>R: reboot into the application
+    R--xH: USB disconnect
+    F-->>H: enumerates as the application
+```
+
 ## Reset interface
 
 The reset interface is found by its class triple `FF/00/01`
@@ -46,6 +72,19 @@ This is the same request `picotool reboot -f -u` sends; `drool` sends it
 over `nusb`.
 
 ## Windows driver binding
+
+```mermaid
+sequenceDiagram
+    participant W as Windows (USB hub driver)
+    participant D as Device
+    W->>D: GET_DESCRIPTOR (Device)
+    D-->>W: bcdUSB 0x0210
+    W->>D: GET_DESCRIPTOR (BOS)
+    D-->>W: MS OS 2.0 platform capability (set length + vendor code)
+    W->>D: vendor request, wIndex 7
+    D-->>W: 174-byte descriptor set (WINUSB + device interface GUID)
+    Note over W: binds WinUSB to the vendor interface
+```
 
 `bcdUSB` of `0x0210` is what makes Windows ask for the BOS descriptor at
 all. The BOS contains an MS OS 2.0 platform capability descriptor, which
