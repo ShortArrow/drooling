@@ -43,7 +43,6 @@ impl PicotoolReset {
 
 impl<B: UsbBus> UsbClass<B> for PicotoolReset {
     fn get_configuration_descriptors(&self, writer: &mut DescriptorWriter) -> Result<()> {
-        // Write vendor reset interface descriptor
         writer.interface_alt(
             self.iface,
             0, // alternate setting
@@ -89,21 +88,18 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
     fn control_in(&mut self, xfer: ControlIn<B>) {
         let req = xfer.request();
 
-        // Handle MS OS 2.0 descriptor request
-        // Vendor request with bRequest=1, wIndex=7
+        // Windows fetches the MS OS 2.0 descriptor set with this vendor request.
         if req.request_type == control::RequestType::Vendor
             && req.recipient == control::Recipient::Device
             && req.request == ms_os_20::MS_OS_20_VENDOR_CODE
             && req.index == 7
         {
-            // Return MS OS 2.0 descriptor set
             let interface_num = u8::from(self.iface);
             let desc = ms_os_20::update_interface_number(interface_num);
             xfer.accept_with(&desc).ok();
             return;
         }
 
-        // Handle vendor-specific interface requests for this interface
         if req.request_type != control::RequestType::Vendor
             || req.recipient != control::Recipient::Interface
             || req.index != u8::from(self.iface) as u16
@@ -111,7 +107,6 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
             return;
         }
 
-        // No data to return for other IN requests - reject
         xfer.reject().ok();
     }
 
@@ -132,7 +127,6 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
                 let (gpio_activity, disable_interface_mask) =
                     crate::protocol::bootsel_reset_args(req.value);
 
-                // Accept the transfer
                 if xfer.accept().is_err() {
                     return;
                 }
@@ -140,12 +134,10 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
                 // Small delay to ensure USB transfer completes
                 cortex_m::asm::delay(1000000); // ~8ms at 125MHz
 
-                // Enter BOOTSEL mode
                 enter_bootsel(gpio_activity, disable_interface_mask)
             }
 
             RESET_REQUEST_FLASH => {
-                // Accept the transfer
                 if xfer.accept().is_err() {
                     return;
                 }
@@ -153,12 +145,10 @@ impl<B: UsbBus> UsbClass<B> for PicotoolReset {
                 // Small delay to ensure USB transfer completes
                 cortex_m::asm::delay(1000000); // ~8ms at 125MHz
 
-                // Reset to flash (normal boot)
                 reboot_to_application()
             }
 
             _ => {
-                // Unknown request - reject
                 xfer.reject().ok();
             }
         }
@@ -192,7 +182,6 @@ fn enter_bootsel(_gpio_activity_pin_mask: u32, disable_interface_mask: u32) -> !
 /// Reboot into the flashed application. Never returns.
 #[cfg(feature = "rp2040")]
 fn reboot_to_application() -> ! {
-    // Trigger a watchdog reset
     unsafe {
         const WATCHDOG_BASE: u32 = 0x40058000;
         const CTRL_OFFSET: u32 = 0x00;
@@ -202,7 +191,6 @@ fn reboot_to_application() -> ! {
         ctrl_reg.write_volatile(CTRL_TRIGGER_BIT);
     }
 
-    // Will never return
     #[allow(clippy::empty_loop)]
     loop {}
 }
