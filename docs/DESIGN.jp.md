@@ -2,6 +2,9 @@
 
 [English](DESIGN.md) | [日本語](DESIGN.jp.md)
 
+C の世界で Pico SDK が提供しているものとの対応は
+[PICO-SDK.jp.md](PICO-SDK.jp.md) にある。
+
 ## 動作原理
 
 デモは USB 複合デバイス(VID:PID `2e8a:000a`)として列挙される:

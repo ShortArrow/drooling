@@ -2,6 +2,9 @@
 
 [English](DESIGN.md) | [日本語](DESIGN.jp.md)
 
+How this maps onto what the Pico SDK provides in the C world is in
+[PICO-SDK.md](PICO-SDK.md).
+
 ## How it works
 
 The demo enumerates as a composite USB device (VID:PID `2e8a:000a`):
