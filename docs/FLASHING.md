@@ -7,8 +7,16 @@ while pressing RESET); every flash after that needs no buttons.
 
 ## The drool flow
 
-The cargo runner is `drool`, the Rust flasher in `tools/drool`
-(`cargo run -q -p drool -- run`). One invocation does the whole cycle: it
+`drool` is the Rust flasher developed in this repository (`tools/drool`).
+Where it comes from depends on where you are:
+
+- **Inside a checkout of this repository** nothing needs installing: the
+  configured runner, `cargo run -q -p drool -- run`, builds and runs the
+  bundled copy on the spot.
+- **In your own project** install it once with `cargo install drool`,
+  then set `runner = "drool run"` in your `.cargo/config.toml`.
+
+One invocation does the whole cycle: it
 finds the running device by its reset interface (class `FF/00/01`, any
 VID/PID), reboots it into BOOTSEL, waits for the ROM, erases and writes
 over PICOBOOT, reads the first 256 bytes back to verify, and reboots into

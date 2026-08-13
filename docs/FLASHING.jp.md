@@ -7,8 +7,16 @@ RESET を押す)。2回目以降はボタン不要。
 
 ## drool のフロー
 
-cargo runner は `tools/drool` の Rust 製書き込みツール `drool`
-(`cargo run -q -p drool -- run`)。1回の実行で全工程を行う: reset
+`drool` は本リポジトリで開発している Rust 製書き込みツール
+(`tools/drool`)。入手方法は読んでいる場所によって違う:
+
+- **本リポジトリのチェックアウト内**ならインストール不要: 設定済みの
+  runner `cargo run -q -p drool -- run` が同梱コピーをその場でビルドして
+  実行する。
+- **自分のプロジェクト**では `cargo install drool` で一度インストールし、
+  `.cargo/config.toml` に `runner = "drool run"` を設定する。
+
+1回の実行で全工程を行う: reset
 interface(class `FF/00/01`、VID/PID は問わない)で実行中デバイスを探し、
 BOOTSEL へ再起動し、ROM の起動を待ち、PICOBOOT で消去・書き込みを行い、
 先頭 256 バイトを読み戻して検証し、アプリケーションへ再起動する。
