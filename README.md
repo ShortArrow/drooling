@@ -87,15 +87,17 @@ Picotool alternatives and platform notes live in
 
 ## Running the bundled demo
 
-The demo is not part of the crates.io package — it lives in this
-repository, and the `cargo rp2040` / `cargo rp2350` commands below are
-cargo aliases defined in the repository's `.cargo/config.toml`, so they
-work only inside a checkout. Start with:
+The crates.io package does not carry the demo. To run it, clone this
+repository first:
 
 ```sh
 git clone https://github.com/ShortArrow/drooling
 cd drooling
 ```
+
+The `cargo rp2040` / `cargo rp2350` commands used below are aliases
+defined in the repository's `.cargo/config.toml`, so they only work
+inside the cloned directory.
 
 `examples/demo_rp2040.rs` is a complete composite device (CDC serial + reset
 interface + LED blink), verified on a Seeed XIAO RP2040 (LED on GPIO25,

@@ -84,15 +84,17 @@ picotool を使う場合の選択肢とプラットフォーム別の注意は
 
 ## 同梱デモの実行
 
-デモは crates.io のパッケージには含まれておらず、このリポジトリの中に
-ある。後述の `cargo rp2040` / `cargo rp2350` はリポジトリの
-`.cargo/config.toml` に定義された cargo エイリアスで、**チェックアウトの
-中でしか動かない**。まずは:
+crates.io のパッケージにデモは入っていない。動かすには、まずこの
+リポジトリを clone する:
 
 ```sh
 git clone https://github.com/ShortArrow/drooling
 cd drooling
 ```
+
+この先で使う `cargo rp2040` / `cargo rp2350` は、リポジトリの
+`.cargo/config.toml` に書いてあるエイリアスなので、clone した
+ディレクトリの中でだけ使える。
 
 `examples/demo_rp2040.rs` は完全な複合デバイス(CDC シリアル + reset interface +
 LED 点滅)。Seeed XIAO RP2040(LED は GPIO25、アクティブ Low)と
