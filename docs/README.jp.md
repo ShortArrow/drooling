@@ -70,8 +70,15 @@ runner = "drool run"
 ```
 
 (本リポジトリ自身は同梱コピーを `cargo run -q -p drool -- run` で
-使っている。)picotool のままにしたい場合は、`tools/flash.cmd` と
-コメントアウトされた runner 行をコピーすればよい。
+使っている。)
+
+picotool のままにしたい場合:
+[`tools/flash.cmd`](https://github.com/ShortArrow/drooling/blob/main/tools/flash.cmd)
+を本リポジトリから自分のプロジェクトの `tools/flash.cmd` へコピーし
+(crates.io のパッケージには含まれていない)、
+`runner = "./tools/flash.cmd"` を設定する。プラットフォーム別の
+picotool runner 行(バッチ不要のワンコマンド版を含む)は後述の
+picotool 節にある。
 
 ## 必要なもの
 
@@ -124,6 +131,29 @@ runner = "picotool load -f -x -t elf"
 
 # Windows + RP2040: 2段階を同梱バッチにまとめたもの
 runner = "./tools/flash.cmd"
+```
+
+このバッチは crates.io のパッケージには含まれていないので、自分の
+プロジェクトに `tools/flash.cmd` として以下の内容で作成する
+(本リポジトリのコピーと同一):
+
+```bat
+@echo off
+rem Button-free flash for RP2040 on Windows.
+rem
+rem picotool on Windows rejects single-shot forced commands for RP2040
+rem ("picotool load -f"), so this script uses the supported two-step flow:
+rem reboot the running firmware into BOOTSEL via its vendor reset interface,
+rem then load. Works from both application mode and BOOTSEL mode.
+
+picotool reboot -f -u >nul 2>&1
+
+for /l %%i in (1,1,10) do (
+  picotool load -x -t elf %1 && exit /b 0
+  ping -n 2 127.0.0.1 >nul
+)
+echo picotool load failed after 10 attempts 1>&2
+exit /b 1
 ```
 
 このバッチが存在するのは、picotool が RP2040 + Windows でワンショットの

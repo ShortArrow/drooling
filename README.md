@@ -73,8 +73,15 @@ runner = "drool run"
 ```
 
 (This repository runs its bundled copy as `cargo run -q -p drool -- run`
-instead.) Copying `tools/flash.cmd` and its commented runner line still
-works if you would rather stay on picotool.
+instead.)
+
+To stay on picotool instead: copy
+[`tools/flash.cmd`](https://github.com/ShortArrow/drooling/blob/main/tools/flash.cmd)
+out of this repository — the crates.io package does not include it —
+into your project at `tools/flash.cmd`, and set
+`runner = "./tools/flash.cmd"`. Platform-by-platform picotool runner
+lines, including the single-command variants that need no batch file,
+are in the picotool section further down.
 
 ## Requirements
 
@@ -126,6 +133,29 @@ runner = "picotool load -f -x -t elf"
 
 # Windows with RP2040: two steps, wrapped in the bundled batch file
 runner = "./tools/flash.cmd"
+```
+
+The batch file is not part of the crates.io package; create it in your
+project as `tools/flash.cmd` with this content (identical to the copy in
+this repository):
+
+```bat
+@echo off
+rem Button-free flash for RP2040 on Windows.
+rem
+rem picotool on Windows rejects single-shot forced commands for RP2040
+rem ("picotool load -f"), so this script uses the supported two-step flow:
+rem reboot the running firmware into BOOTSEL via its vendor reset interface,
+rem then load. Works from both application mode and BOOTSEL mode.
+
+picotool reboot -f -u >nul 2>&1
+
+for /l %%i in (1,1,10) do (
+  picotool load -x -t elf %1 && exit /b 0
+  ping -n 2 127.0.0.1 >nul
+)
+echo picotool load failed after 10 attempts 1>&2
+exit /b 1
 ```
 
 The batch file exists because picotool refuses single-shot forced
